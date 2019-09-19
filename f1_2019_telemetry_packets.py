@@ -35,27 +35,32 @@ class MyLittleEndianStructure(ctypes.LittleEndianStructure):
 #   They state two important facts that are needed to correctly interpret the packet structs:
 #   - The structs are packed (i.e, no padding).
 #   - The numeric fields are transferred in little-endian format.
+#
+# Mistakes in the 2019 specification (CodeMasters forum post):
+# - In the 'PacketMotionData' struct, the comments for the m_angularAcceleration{X,Y,Z} field erroneously
+#   say 'velocity' rather than 'acceleration'.
+#
 
 # TODO list for transcription, and transcription notes.
 #
-# - Packet Header               UPDATED
-# - Packet IDs
-# - Motion Packet               UPDATED
-# - Session Packet              UPDATED
-# - Lap Data Packet             UPDATED
-# - Event Packet                UPDATED
-# - Event String Codes          UPDATED
-# - Participant Packet          UPDATED
-# - Car Setups Packet           UPDATED
-# - Car Telemetry Packet        UPDATED
-# - Car Status Packet           UPDATED
-# - Restricted Data             UPDATED
-# - Team IDs                    UPDATED
-# - Driver IDs                  UPDATED
-# - Track IDs                   UPDATED
-# - Nationality IDs             UPDATED
-# - Surface Types               UPDATED
-# - Button Flags                UPDATED
+# - Packet Header               header  VERIFIED
+# - Packet IDs                  enum
+# - Motion Packet               packet  VERIFIED
+# - Session Packet              packet  VERIFIED
+# - Lap Data Packet             packet  UPDATED
+# - Event Packet                packet  UPDATED
+# - Event String Codes          enum    UPDATED
+# - Participant Packet          packet  UPDATED
+# - Car Setups Packet           packet  UPDATED
+# - Car Telemetry Packet        packet  UPDATED
+# - Car Status Packet           packet  UPDATED
+# - Restricted Data             info    UPDATED
+# - Team IDs                    table   UPDATED
+# - Driver IDs                  table   UPDATED
+# - Track IDs                   table   UPDATED
+# - Nationality IDs             table   UPDATED
+# - Surface Types               table   UPDATED
+# - Button Flags                enum    UPDATED
 
 # Overview
 # --------
@@ -120,7 +125,7 @@ class PacketHeader(MyLittleEndianStructure):
 # The motion packet gives physics data for all the cars being driven. There is additional data for the car being
 # driven with the goal of being able to drive a motion platform setup.
 #
-# N.B. For the normalised vectors below, to convert to float values divide by 32767.0f. 16-bit signed values are
+# N.B. For the normalised vectors below, to convert to float values divide by 32767.0f --- 16-bit signed values are
 # used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.
 #
 # Frequency: Rate as specified in menus
@@ -171,9 +176,9 @@ class PacketMotionData_V1(MyLittleEndianStructure):
         ('angularVelocityX'       , ctypes.c_float       ),  # Angular velocity x-component
         ('angularVelocityY'       , ctypes.c_float       ),  # Angular velocity y-component
         ('angularVelocityZ'       , ctypes.c_float       ),  # Angular velocity z-component
-        ('angularAccelerationX'   , ctypes.c_float       ),  # Angular velocity x-component
-        ('angularAccelerationY'   , ctypes.c_float       ),  # Angular velocity y-component
-        ('angularAccelerationZ'   , ctypes.c_float       ),  # Angular velocity z-component
+        ('angularAccelerationX'   , ctypes.c_float       ),  # Angular acceleration x-component
+        ('angularAccelerationY'   , ctypes.c_float       ),  # Angular acceleration y-component
+        ('angularAccelerationZ'   , ctypes.c_float       ),  # Angular acceleration z-component
         ('frontWheelsAngle'       , ctypes.c_float       )   # Current front wheels angle in radians
     ]
 
