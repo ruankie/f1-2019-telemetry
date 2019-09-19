@@ -1,4 +1,5 @@
 
+import enum
 import ctypes
 
 class MyLittleEndianStructure(ctypes.LittleEndianStructure):
@@ -37,9 +38,14 @@ class MyLittleEndianStructure(ctypes.LittleEndianStructure):
 #   - The numeric fields are transferred in little-endian format.
 #
 # Mistakes in the 2019 specification (CodeMasters forum post):
-# - In the 'PacketMotionData' struct, the comments for the m_angularAcceleration{X,Y,Z} field erroneously
-#   say 'velocity' rather than 'acceleration'.
 #
+# - In the 'Types and Description' table, the type of the m_frameIdentifier field of the PacketHeader should be
+#   specified; 'uint', or preferably, 'uint32' (see remark below).
+# - In the 'PacketHeader', table the type of the 'm_frameIdentifier' field is given as 'uint'.
+#   For consistency with the other type names, this should be 'uint32'.
+# - In the 'PacketMotionData' struct, the comments for the m_angularAcceleration{X,Y,Z} field erroneously
+#   mention 'velocity' rather than 'acceleration'.
+# - In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a type; should be "Wilhelm Kaufmann"
 
 # TODO list for transcription, and transcription notes.
 #
@@ -596,7 +602,6 @@ TeamIDs = {
     17 : 'Ferrari 2004',
     18 : 'Renault 2006',
     19 : 'Ferrari 2007',
-    20 : 'McLaren 2008',
     21 : 'Red Bull 2010',
     22 : 'Ferrari 1976',
     23 : 'ART Grand Prix',
@@ -624,7 +629,7 @@ TeamIDs = {
 
 DriverIDs = {
      0 : 'Carlos Sainz',
-     2 : 'Daniil Kvyat',
+     1 : 'Daniil Kvyat',
      2 : 'Daniel Ricciardo',
      6 : 'Kimi Räikkönen',
      7 : 'Lewis Hamilton',
@@ -848,21 +853,42 @@ SurfaceTypes = {
 #
 # | Bit flag | Button            |
 # | -------- | ----------------- |
-# |  0x0001  | Cross or A        |
-# |  0x0002  | Triangle or Y     |
-# |  0x0004  | Circle or B       |
-# |  0x0008  | Square or X       |
-# |  0x0010  | D-pad Left        |
-# |  0x0020  | D-pad Right       |
-# |  0x0040  | D-pad Up          |
-# |  0x0080  | D-pad Down        |
-# |  0x0100  | Options or Menu   |
-# |  0x0200  | L1 or LB          |
-# |  0x0400  | R1 or RB          |
-# |  0x0800  | L2 or LT          |
-# |  0x1000  | R2 or RT          |
-# |  0x2000  | Left Stick Click  |
-# |  0x4000  | Right Stick Click |
+
+@enum.unique
+class ButtonFlags(enum.Enum):
+    CROSS             = 0x0001
+    TRIANGLE          = 0x0002
+    CIRCLE            = 0x0004
+    SQUARE            = 0x0008
+    D_PAD_LEFT        = 0x0010
+    D_PAD_RIGHT       = 0x0020
+    D_PAD_UP          = 0x0040
+    D_PAD_DOWN        = 0x0080
+    OPTIONS           = 0x0100
+    L1                = 0x0200
+    R1                = 0x0400
+    L2                = 0x0800
+    R2                = 0x1000
+    LEFT_STICK_CLICK  = 0x2000
+    RIGHT_STICK_CLICK = 0x4000
+
+ButtonFlagsDescription = {
+        ButtonFlags.CROSS             : "Cross or A",
+        ButtonFlags.TRIANGLE          : "Triangle or Y",
+        ButtonFlags.CIRCLE            : "Circle or B",
+        ButtonFlags.SQUARE            : "Square or X",
+        ButtonFlags.D_PAD_LEFT        : "D-pad Left",
+        ButtonFlags.D_PAD_RIGHT       : "D-pad Right",
+        ButtonFlags.D_PAD_UP          : "D-pad Up",
+        ButtonFlags.D_PAD_DOWN        : "D-pad Down",
+        ButtonFlags.OPTIONS           : "Options or Menu",
+        ButtonFlags.L1                : "L1 or LB",
+        ButtonFlags.R1                : "R1 or RB",
+        ButtonFlags.L2                : "L2 or LT",
+        ButtonFlags.R2                : "R2 or RT",
+        ButtonFlags.LEFT_STICK_CLICK  : "Left Stick Click",
+        ButtonFlags.RIGHT_STICK_CLICK : "Right Stick Click"
+    }
 
 if __name__ == "__main__":
 
