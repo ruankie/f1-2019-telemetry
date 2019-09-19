@@ -1,102 +1,47 @@
+"""F1 2019 UDP Telemetry Packets specification.
+
+This module is based on the CodeMasters Forum post documenting the packet format:
+
+    https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
+
+The specification as given in the forum post has a handful of minor issues; these have been fixed here:
+
+- In the 'Types and Description' table, the type of the m_frameIdentifier field of the PacketHeader should be
+  present; 'uint', or preferably, 'uint32' (see remark below).
+- In the 'PacketHeader', table the type of the 'm_frameIdentifier' field is given as 'uint'.
+  For consistency with the other type names, this should be 'uint32'.
+- In the 'PacketMotionData' struct, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
+  refer to 'velocity' rather than 'acceleration'.
+- In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a typo; whenever this player is encountered
+  in the game, his name is given as "Wilhelm Kaufmann".
+- PacketID.long_description[PacketID.EVENT] describes a more limited version of the Event packet, suggesting that
+  it is only used for start-of-session and end-of-session events, as it was in F1 2018.
+"""
 
 import enum
 import ctypes
 
-class MyLittleEndianStructure(ctypes.LittleEndianStructure):
-    """The standard ctypes LittleEndianStructure, with a proper repr() function."""
+class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
+    """The standard ctypes LittleEndianStructure, but tightly packed (no field padding), and with a proper repr() function."""
+    _pack_ = 1
+
     def __repr__(self):
         fstr_list = []
         for (fname, ftype) in self._fields_:
             value = getattr(self, fname)
-            if isinstance(value, (MyLittleEndianStructure, int, float, bytes)):
+            if isinstance(value, (PackedLittleEndianStructure, int, float, bytes)):
                 vstr = repr(value)
             elif isinstance(value, ctypes.Array):
                 vstr = "[{}]".format(", ".join(repr(e) for e in value))
             else:
-                print("oops:", type(value), value)
-                assert False
+                raise RuntimeError("Bad value {!r} of type {!r}".format(value, type(value)))
             fstr = "{}={}".format(fname, vstr)
             fstr_list.append(fstr)
         return "{}({})".format(self.__class__.__name__, ", ".join(fstr_list))
 
 
-# F1 2019 UDP SPECIFICATION
-# =========================
-#
-# Based on the CodeMasters Forum post documenting the format:
-#
-#     https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
-#
-# Editorial notes:
-#
-# * Tables were included as images, we turned them into proper MarkDown tables, here.
-# * We changed driver name 'Wilheim Kaufmann' into 'Wilhelm Kaufmann'.
-# * Fixed PacketSessionData's field 'm_networkGame'. It should have type 'uint8', not 'unint8'.
-# * The FAQ entries that follow the UDP specification were omitted.
-#   They state two important facts that are needed to correctly interpret the packet structs:
-#   - The structs are packed (i.e, no padding).
-#   - The numeric fields are transferred in little-endian format.
-#
-# Mistakes in the 2019 specification (CodeMasters forum post):
-#
-# - In the 'Types and Description' table, the type of the m_frameIdentifier field of the PacketHeader should be
-#   specified; 'uint', or preferably, 'uint32' (see remark below).
-# - In the 'PacketHeader', table the type of the 'm_frameIdentifier' field is given as 'uint'.
-#   For consistency with the other type names, this should be 'uint32'.
-# - In the 'PacketMotionData' struct, the comments for the m_angularAcceleration{X,Y,Z} field erroneously
-#   mention 'velocity' rather than 'acceleration'.
-# - In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a type; should be "Wilhelm Kaufmann"
-
-# TODO list for transcription, and transcription notes.
-#
-# - Packet Header               header  VERIFIED
-# - Packet IDs                  enum
-# - Motion Packet               packet  VERIFIED
-# - Session Packet              packet  VERIFIED
-# - Lap Data Packet             packet  UPDATED
-# - Event Packet                packet  UPDATED
-# - Event String Codes          enum    UPDATED
-# - Participant Packet          packet  UPDATED
-# - Car Setups Packet           packet  UPDATED
-# - Car Telemetry Packet        packet  UPDATED
-# - Car Status Packet           packet  UPDATED
-# - Restricted Data             info    UPDATED
-# - Team IDs                    table   UPDATED
-# - Driver IDs                  table   UPDATED
-# - Track IDs                   table   UPDATED
-# - Nationality IDs             table   UPDATED
-# - Surface Types               table   UPDATED
-# - Button Flags                enum    UPDATED
-
-# Overview
-# --------
-#
-# The F1 series of games support the outputting of key game data via a UDP data stream. This data can be
-# interpreted by external apps or connected peripherals for a range of different uses, including providing
-# additional telemetry information, customised HUD displays, motion platform hardware support or providing force
-# feedback data for custom steering wheels. The following information is a summary of the data that is outputted
-# so that developers of supporting hardware or software are able to configure these to work with the F1 game
-# correctly. If the information you require is not contained here, or if you have any issues with the UDP data
-# itself, then please let us know and a member of the dev team will respond to your query as soon as possible.
-
-# Packet Types
-# ------------
-#
-# The main change for 2018 is the introduction of multiple packet types: each packet can now carry different types
-# of data rather than having one packet which contains everything. A header has been added to each packet as well
-# so that versioning can be tracked and it will be easier for applications to check they are interpreting the
-# incoming data in the correct way.
-#
-
-# Packet Header
-# -------------
-#
-# Each packet has the following header:
-
-class PacketHeader(MyLittleEndianStructure):
-
-    _pack_ = 1
-
+class PacketHeader(PackedLittleEndianStructure):
+    """The header for each of the UDP telemetry packets."""
     _fields_ = [
         ('packetFormat'     , ctypes.c_uint16),  # 2019
         ('gameMajorVersion' , ctypes.c_uint8 ),  # Game major version - "X.00"
@@ -109,39 +54,51 @@ class PacketHeader(MyLittleEndianStructure):
         ('playerCarIndex'   , ctypes.c_uint8 )   # Index of player's car in the array
     ]
 
-# Packet IDs
-# ----------
-#
-# The packets IDs are as follows:
-#
-#| Packet Name   | Value | Description                               | Frequency       | Size
-#| ------------- | ----- | ----------------------------------------- | --------------- | ----------
-#| Motion        |   0   | Contains motion data for all cars         | Menu setting    | 1341 bytes
-#| Session       |   1   | General data about the session            | 2 per second    |  147 bytes
-#| Lap Data      |   2   | Lap time info for all cars in the session | Menu setting    |  841 bytes
-#| Event         |   3   | Session start or session end              | On event        |   25 bytes
-#| Participants  |   4   | List of participants in the session       | Every 5 seconds | 1082 bytes
-#| Car Setups    |   5   | Car setup info for cars in the race       | 2 per second    |  841 bytes
-#| Car Telemetry |   6   | Telemetry data for all cars               | Menu settings   | 1085 bytes
-#| Car Status    |   7   | General car status info for all cars      | 2 per second    | 1061 bytes
 
-# Motion Packet
-# -------------
-#
-# The motion packet gives physics data for all the cars being driven. There is additional data for the car being
-# driven with the goal of being able to drive a motion platform setup.
-#
-# N.B. For the normalised vectors below, to convert to float values divide by 32767.0f --- 16-bit signed values are
-# used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.
-#
-# Frequency: Rate as specified in menus
-# Size: 1343 bytes
-# Version: 1
+@enum.unique
+class PacketID(enum.IntEnum):
+    """Value as specified in the PacketHeader.packetId header field, to distinguish packet types."""
+    MOTION        = 0
+    SESSION       = 1
+    LAP_DATA      = 2
+    EVENT         = 3
+    PARTICIPANTS  = 4
+    CAR_SETUPS    = 5
+    CAR_TELEMETRY = 6
+    CAR_STATUS    = 7
 
-class CarMotionData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+PacketID.short_description = {
+    PacketID.MOTION        : 'Motion',
+    PacketID.SESSION       : 'Session',
+    PacketID.LAP_DATA      : 'Lap Data',
+    PacketID.EVENT         : 'Event',
+    PacketID.PARTICIPANTS  : 'Participants',
+    PacketID.CAR_SETUPS    : 'Car Setups',
+    PacketID.CAR_TELEMETRY : 'Car Telemetry',
+    PacketID.CAR_STATUS    : 'Car Status'
+}
 
+
+PacketID.long_description = {
+    PacketID.MOTION        : 'Contains motion data for all cars',
+    PacketID.SESSION       : 'General data about the session',
+    PacketID.LAP_DATA      : 'Lap time info for all cars in the session',
+    PacketID.EVENT         : 'Session start, session end, and other race events',
+    PacketID.PARTICIPANTS  : 'List of participants in the session',
+    PacketID.CAR_SETUPS    : 'Car setup info for cars in the race',
+    PacketID.CAR_TELEMETRY : 'Telemetry data for all cars',
+    PacketID.CAR_STATUS    : 'General car status info for all cars'
+}
+
+#########################################################
+#                                                       #
+#  ----------  Packet ID 0 : MOTION PACKET  ----------  #
+#                                                       #
+#########################################################
+
+class CarMotionData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'carMotionData' array of the PacketMotionData_V1 type, defined below."""
     _fields_ = [
         ('worldPositionX'     , ctypes.c_float),  # World space X position
         ('worldPositionY'     , ctypes.c_float),  # World space Y position
@@ -163,10 +120,19 @@ class CarMotionData_V1(MyLittleEndianStructure):
         ('roll'               , ctypes.c_float)   # Roll angle in radians
     ]
 
-class PacketMotionData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+class PacketMotionData_V1(PackedLittleEndianStructure):
+    """The motion packet gives physics data for all the cars being driven.
 
+    There is additional data for the car being driven with the goal of being able to drive a motion platform setup.
+
+    N.B. For the normalised vectors below, to convert to float values divide by 32767.0f --- 16-bit signed values are
+    used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.
+    
+    Frequency: Rate as specified in menus
+    Size: 1343 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'                 , PacketHeader         ),  # Header
         ('carMotionData'          , CarMotionData_V1 * 20),  # Data for all cars on track
@@ -188,28 +154,27 @@ class PacketMotionData_V1(MyLittleEndianStructure):
         ('frontWheelsAngle'       , ctypes.c_float       )   # Current front wheels angle in radians
     ]
 
-# Session Packet
-# --------------
-#
-# The session packet includes details about the current session in progress.
-#
-# Frequency: 2 per second
-# Size: 149 bytes
-# Version: 1
+##########################################################
+#                                                        #
+#  ----------  Packet ID 1 : SESSION PACKET  ----------  #
+#                                                        #
+##########################################################
 
-class MarshalZone_V1(MyLittleEndianStructure):
-
-    _pack_ = 1
-
+class MarshalZone_V1(PackedLittleEndianStructure):
+    """This type is used for the 21-element 'marshalZones' array of the PacketSessionData_V1 type, defined below."""
     _fields_ = [
         ('zoneStart' , ctypes.c_float),  # Fraction (0..1) of way through the lap the marshal zone starts
         ('zoneFlag'  , ctypes.c_int8 )   # -1 = invalid/unknown, 0 = none, 1 = green, 2 = blue, 3 = yellow, 4 = red
     ]
 
-class PacketSessionData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+class PacketSessionData_V1(PackedLittleEndianStructure):
+    """The session packet includes details about the current session in progress.
 
+    Frequency: 2 per second
+    Size: 149 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'              , PacketHeader       ),  # Header
         ('weather'             , ctypes.c_uint8     ),  # Weather - 0 = clear, 1 = light cloud, 2 = overcast
@@ -238,19 +203,14 @@ class PacketSessionData_V1(MyLittleEndianStructure):
         ('networkGame'         , ctypes.c_uint8     )   # 0 = offline, 1 = online
     ]
 
-# Lap Data Packet
-# ---------------
-#
-# The lap data packet gives details of all the cars in the session.
-#
-# Frequency: Rate as specified in menus
-# Size: 843 bytes
-# Version: 1
+###########################################################
+#                                                         #
+#  ----------  Packet ID 2 : LAP DATA PACKET  ----------  #
+#                                                         #
+###########################################################
 
-class LapData_V1(MyLittleEndianStructure):
-
-    _pack_ = 1
-
+class LapData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'lapData' array of the PacketLapData_V1 type, defined below."""
     _fields_ = [
 
         ('lastLapTime'       , ctypes.c_float),  # Last lap time in seconds
@@ -277,27 +237,32 @@ class LapData_V1(MyLittleEndianStructure):
                                                  # 6 = retired
     ]
 
-class PacketLapData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+class PacketLapData_V1(PackedLittleEndianStructure):
+    """The lap data packet gives details of all the cars in the session.
 
+    Frequency: Rate as specified in menus
+    Size: 843 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'  , PacketHeader   ),  # Header
         ('lapData' , LapData_V1 * 20)   # Lap data for all cars on track
     ]
 
-# Event Packet
-# ------------
-#
-# This packet gives details of events that happen during the course of a session. 
-#
-# Frequency: When the event occurs
-# Size: 32 bytes
+########################################################
+#                                                      #
+#  ----------  Packet ID 3 : EVENT PACKET  ----------  #
+#                                                      #
+########################################################
 
-class PacketEventData_V1(MyLittleEndianStructure):
+class PacketEventData_V1(PackedLittleEndianStructure):
+    """This packet gives details of events that happen during the course of a session. 
 
-    _pack_ = 1
-
+    Frequency: When the event occurs
+    Size: 32 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'          , PacketHeader     ),  # Header
         ('eventStringCode' , ctypes.c_char * 4),  # Event string code, see below
@@ -306,32 +271,53 @@ class PacketEventData_V1(MyLittleEndianStructure):
         ('lapTime'         , ctypes.c_float   )   # Lap time is in seconds  (valid for events: FTLP)
     ]
 
-# | Session Started   | "SSTA" | Sent when the session starts           |
-# | Session Ended     | "SEND" | Sent when the session ends             |
-# | Fastest Lap       | "FTLP" | When a driver achieves the fastest lap |
-# | Retirement        | "RTMT" | When a driver retires                  |
-# | DRS enabled       | "DRSE" | Race control have enabled DRS          |
-# | DRS disabled      | "DRSD" | Race control have disabled DRS         |
-# | Team mate in pits | "TMPT" | Your team mate has entered the pits    |
-# | Chequered flag    | "CHQF" | The chequered flag has been waved      |
-# | Race Winner       | "RCWN" | The race winner is announced           |
 
-# Participants Packet
-# -------------------
-#
-# This is a list of participants in the race. If the vehicle is controlled by AI, then the name will be the driver
-# name. If this is a multiplayer game, the names will be the Steam Id on PC, or the LAN name if appropriate. On
-# Xbox One, the names will always be the driver name, on PS4 the name will be the LAN name if playing a LAN game,
-# otherwise it will be the driver name.
-#
-# Frequency: Every 5 seconds
-# Size: 1104 bytes
-# Version: 1
+class EventStringCode(enum.Enum):
+    """Value as specified in the PacketEventData_V1.eventStringCode header field, used to distinguish packet types."""
+    SSTA = b'SSTA'
+    SEND = b'SEND'
+    FTLP = b'FTLP'
+    RTMT = b'RTMT'
+    DRSE = b'DRSE'
+    DRSD = b'DRSD'
+    TMPT = b'TMPT'
+    CHQF = b'CHQF'
+    RCWN = b'RCWN'
 
-class ParticipantData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+EventStringCode.short_description = {
+    EventStringCode.SSTA : 'Session Started',
+    EventStringCode.SEND : 'Session Ended',
+    EventStringCode.FTLP : 'Fastest Lap',
+    EventStringCode.RTMT : 'Retirement',
+    EventStringCode.DRSE : 'DRS enabled',
+    EventStringCode.DRSD : 'DRS disabled',
+    EventStringCode.TMPT : 'Team mate in pits',
+    EventStringCode.CHQF : 'Chequered flag',
+    EventStringCode.RCWN : 'Race Winner'
+}
 
+
+EventStringCode.long_description = {
+    EventStringCode.SSTA : 'Sent when the session starts',
+    EventStringCode.SEND : 'Sent when the session ends',
+    EventStringCode.FTLP : 'When a driver achieves the fastest lap',
+    EventStringCode.RTMT : 'When a driver retires',
+    EventStringCode.DRSE : 'Race control have enabled DRS',
+    EventStringCode.DRSD : 'Race control have disabled DRS',
+    EventStringCode.TMPT : 'Your team mate has entered the pits',
+    EventStringCode.CHQF : 'The chequered flag has been waved',
+    EventStringCode.RCWN : 'The race winner is announced'
+}
+
+###############################################################
+#                                                             #
+#  ----------  Packet ID 4 : PARTICIPANTS PACKET  ----------  #
+#                                                             #
+###############################################################
+
+class ParticipantData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'participants' array of the PacketParticipantsData_V1 type, defined below."""
     _fields_ = [
         ('aiControlled' , ctypes.c_uint8    ),  # Whether the vehicle is AI (1) or Human (0) controlled
         ('driverId'     , ctypes.c_uint8    ),  # Driver id - see appendix
@@ -343,10 +329,19 @@ class ParticipantData_V1(MyLittleEndianStructure):
         ('yourTelemetry', ctypes.c_uint8    )   # The player's UDP setting, 0 = restricted, 1 = public
     ]
 
-class PacketParticipantsData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+class PacketParticipantsData_V1(PackedLittleEndianStructure):
+    """This is a list of participants in the race.
 
+    If the vehicle is controlled by AI, then the name will be the driver name.
+    If this is a multiplayer game, the names will be the Steam Id on PC, or the LAN name if appropriate.
+    On Xbox One, the names will always be the driver name, on PS4 the name will be the LAN name if playing a LAN game,
+    otherwise it will be the driver name.
+
+    Frequency: Every 5 seconds
+    Size: 1104 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'        , PacketHeader           ),  # Header
         ('numActiveCars' , ctypes.c_uint8         ),  # Number of active cars in the data – should match number of
@@ -354,20 +349,14 @@ class PacketParticipantsData_V1(MyLittleEndianStructure):
         ('participants'  , ParticipantData_V1 * 20)
     ]
 
-# Car Setups Packet
-# -----------------
-#
-# This packet details the car setups for each vehicle in the session. Note that in multiplayer games, other
-# player cars will appear as blank, you will only be able to see your car setup and AI cars.
-#
-# Frequency: 2 per second 
-# Size: 843 bytes
-# Version: 1
+#############################################################
+#                                                           #
+#  ----------  Packet ID 5 : CAR SETUPS PACKET  ----------  #
+#                                                           #
+#############################################################
 
-class CarSetupData_V1(MyLittleEndianStructure):
-
-    _pack_ = 1
-
+class CarSetupData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'carSetups' array of the PacketCarSetupData_V1 type, defined below."""
     _fields_ = [
         ('frontWing'             , ctypes.c_uint8),  # Front wing aero
         ('rearWing'              , ctypes.c_uint8),  # Rear wing aero
@@ -392,29 +381,28 @@ class CarSetupData_V1(MyLittleEndianStructure):
     ]
 
 
-class PacketCarSetupData_V1(MyLittleEndianStructure):
+class PacketCarSetupData_V1(PackedLittleEndianStructure):
+    """This packet details the car setups for each vehicle in the session.
 
-    _pack_ = 1
+    Note that in multiplayer games, other player cars will appear as blank, you will only be able to see your car setup and AI cars.
 
+    Frequency: 2 per second 
+    Size: 843 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'    , PacketHeader        ),  # Header
         ('carSetups' , CarSetupData_V1 * 20)
     ]
 
-# Car Telemetry Packet
-# --------------------
-#
-# This packet details telemetry for all the cars in the race. It details various values that would be recorded on
-# the car such as speed, throttle application, DRS etc.
-#
-# Frequency: Rate as specified in menus
-# Size: 1347 bytes
-# Version: 1
+################################################################
+#                                                              #
+#  ----------  Packet ID 6 : CAR TELEMETRY PACKET  ----------  #
+#                                                              #
+################################################################
 
-class CarTelemetryData_V1(MyLittleEndianStructure):
-
-    _pack_ = 1
-
+class CarTelemetryData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'carTelemetryData' array of the PacketCarTelemetryData_V1 type, defined below."""
     _fields_ = [
         ('speed'                   , ctypes.c_uint16    ),  # Speed of car in kilometres per hour
         ('throttle'                , ctypes.c_float     ),  # Amount of throttle applied (0.0 to 1.0)
@@ -433,10 +421,16 @@ class CarTelemetryData_V1(MyLittleEndianStructure):
         ('surfaceType'             , ctypes.c_uint8  * 4)   # Driving surface, see appendices
     ]
 
-class PacketCarTelemetryData_V1(MyLittleEndianStructure):
 
-    _pack_ = 1
+class PacketCarTelemetryData_V1(PackedLittleEndianStructure):
+    """This packet details telemetry for all the cars in the race.
 
+    It details various values that would be recorded on the car such as speed, throttle application, DRS etc.
+
+    Frequency: Rate as specified in menus
+    Size: 1347 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'           , PacketHeader            ),  # Header
         ('carTelemetryData' , CarTelemetryData_V1 * 20),
@@ -444,20 +438,43 @@ class PacketCarTelemetryData_V1(MyLittleEndianStructure):
                                                           # pressed currently - see appendices
     ]
 
-# Car Status Packet
-# -----------------
-#
-# This packet details car statuses for all the cars in the race. It includes values such as the damage readings
-# on the car.
-#
-# Frequency: Rate as specified in menus
-# Size: 1143 bytes
-# Version: 1
+#############################################################
+#                                                           #
+#  ----------  Packet ID 7 : CAR STATUS PACKET  ----------  #
+#                                                           #
+#############################################################
 
-class CarStatusData_V1(MyLittleEndianStructure):
+class CarStatusData_V1(PackedLittleEndianStructure):
+    """This type is used for the 20-element 'carStatusData' array of the PacketCarStatusData_V1 type, defined below.
 
-    _pack_ = 1
+    There is some data in the Car Status packets that you may not want other players seeing if you are in a multiplayer game.
+    This is controlled by the "Your Telemetry" setting in the Telemetry options. The options are:
 
+        Restricted (Default) – other players viewing the UDP data will not see values for your car;
+        Public – all other players can see all the data for your car.
+
+    Note: You can always see the data for the car you are driving regardless of the setting.
+
+    The following data items are set to zero if the player driving the car in question has their "Your Telemetry" set to "Restricted":
+
+        fuelInTank
+        fuelCapacity
+        fuelMix
+        fuelRemainingLaps
+        frontBrakeBias
+        frontLeftWingDamage
+        frontRightWingDamage
+        rearWingDamage
+        engineDamage
+        gearBoxDamage
+        tyresWear (All four wheels)
+        tyresDamage (All four wheels)
+        ersDeployMode
+        ersStoreEnergy
+        ersDeployedThisLap
+        ersHarvestedThisLapMGUK
+        ersHarvestedThisLapMGUH
+    """
     _fields_ = [
         ('tractionControl'         , ctypes.c_uint8    ),  # 0 (off) - 2 (high)
         ('antiLockBrakes'          , ctypes.c_uint8    ),  # 0 (off) - 1 (on)
@@ -497,89 +514,26 @@ class CarStatusData_V1(MyLittleEndianStructure):
         ('ersDeployedThisLap'      , ctypes.c_float    )   # ERS energy deployed this lap
     ]
 
-# Restricted data (Your Telemetry setting)
-#
-# There is some data in the UDP that you may not want other players seeing if you are in a multiplayer game. This is controlled by the "Your Telemetry" setting in the Telemetry options. The options are:
-#
-#    Restricted (Default) – other players viewing the UDP data will not see values for your car
-#    Public – all other players can see all the data for your car
-#
-# Note: You can always see the data for the car you are driving regardless of the setting.
-#
-# The following data items are set to zero if the player driving the car in question has their “Your Telemetry” set to “Restricted”:
-#
-# Car status packet
-#
-#    fuelInTank
-#    fuelCapacity
-#    fuelMix
-#    fuelRemainingLaps
-#    frontBrakeBias
-#    frontLeftWingDamage
-#    frontRightWingDamage
-#    rearWingDamage
-#    engineDamage
-#    gearBoxDamage
-#    tyresWear (All four wheels)
-#    tyresDamage (All four wheels)
-#    ersDeployMode
-#    ersStoreEnergy
-#    ersDeployedThisLap
-#    ersHarvestedThisLapMGUK
-#    ersHarvestedThisLapMGUH
 
-class PacketCarStatusData_V1(MyLittleEndianStructure):
+class PacketCarStatusData_V1(PackedLittleEndianStructure):
+    """This packet details car statuses for all the cars in the race.
 
-    _pack_ = 1
+    It includes values such as the damage readings on the car.
 
+    Frequency: Rate as specified in menus
+    Size: 1143 bytes
+    Version: 1
+    """
     _fields_ = [
         ('header'        , PacketHeader         ),  # Header
         ('carStatusData' , CarStatusData_V1 * 20)
     ]
 
-# Map from (packetFormat, packetVersion, packetId) to specific packet type.
-
-HeaderFieldsToPacketType = {
-    (2019, 1, 0) : PacketMotionData_V1,
-    (2019, 1, 1) : PacketSessionData_V1,
-    (2019, 1, 2) : PacketLapData_V1,
-    (2019, 1, 3) : PacketEventData_V1,
-    (2019, 1, 4) : PacketParticipantsData_V1,
-    (2019, 1, 5) : PacketCarSetupData_V1,
-    (2019, 1, 6) : PacketCarTelemetryData_V1,
-    (2019, 1, 7) : PacketCarStatusData_V1
-}
-
-def unpack_udp_packet(packet: bytes) -> MyLittleEndianStructure:
-    """Convert raw UDP packet to an appropriately-typed telemetry packet.
-
-    This function throws a ValueError exception if a problem is detected.
-    """
-
-    actual_packet_size = len(packet)
-
-    header_size = ctypes.sizeof(PacketHeader)
-
-    if actual_packet_size < header_size:
-        raise ValueError("Bad telemetry packet: too short ({} bytes).".format(actual_packet_size))
-
-    header = PacketHeader.from_buffer_copy(packet)
-    key = (header.packetFormat, header.packetVersion, header.packetId)
-
-    if key not in HeaderFieldsToPacketType:
-        raise ValueError("Bad telemetry packet: no match for key fields {!r}.".format(key))
-
-    packet_type = HeaderFieldsToPacketType[key]
-
-    expected_packet_size = ctypes.sizeof(packet_type)
-
-    if actual_packet_size != expected_packet_size:
-        raise ValueError("Bad telemetry packet: bad size for {} packet; expected {} bytes but received {} bytes.".format(
-            packet_type.__name__, expected_packet_size, actual_packet_size))
-
-    return packet_type.from_buffer_copy(packet)
-
-# Dictionaries for the various IDs used in the UDP output:
+###################################################################
+#                                                                 #
+#  Appendices: various value enumerations used in the UDP output  #
+#                                                                 #
+###################################################################
 
 TeamIDs = {
      0 : 'Mercedes',
@@ -626,6 +580,7 @@ TeamIDs = {
     64 : 'McLaren 2010',
     65 : 'Ferrari 2010'
 }
+
 
 DriverIDs = {
      0 : 'Carlos Sainz',
@@ -695,6 +650,7 @@ DriverIDs = {
     75 : 'Robert Kubica'
 }
 
+
 TrackIDs = {
      0 : 'Melbourne',
      1 : 'Paul Ricard',
@@ -722,6 +678,7 @@ TrackIDs = {
     23 : 'Texas Short',
     24 : 'Suzuka Short'
 }
+
 
 NationalityIDs = {
      1 : 'American',
@@ -812,8 +769,8 @@ NationalityIDs = {
     86 : 'Welsh'
 }
 
-# These types are from physics data and show what type of contact each wheel is experiencing.
 
+# These surface types are from physics data and show what type of contact each wheel is experiencing.
 SurfaceTypes = {
      0 : 'Tarmac',
      1 : 'Rumble strip',
@@ -829,33 +786,9 @@ SurfaceTypes = {
     11 : 'Ridged'
 }
 
-# Event String Codes
-# ------------------
-#
-#
-# | Event             | Code   | Description                            |
-# | ----------------- | ------ | -------------------------------------- |
-# | Session Started   | "SSTA" | Sent when the session starts           |
-# | Session Ended     | "SEND" | Sent when the session ends             |
-# | Fastest Lap       | "FTLP" | When a driver achieves the fastest lap |
-# | Retirement        | "RTMT" | When a driver retires                  |
-# | DRS enabled       | "DRSE" | Race control have enabled DRS          |
-# | DRS disabled      | "DRSD" | Race control have disabled DRS         |
-# | Team mate in pits | "TMPT" | Your team mate has entered the pits    |
-# | Chequered flag    | "CHQF" | The chequered flag has been waved      |
-# | Race Winner       | "RCWN" | The race winner is announced           |
-
-# Button flags
-# ------------
-#
-# These flags are used in the telemetry packet to determine if any buttons are being held on the controlling device.
-# If the value below logical ANDed with the button status is set then the corresponding button is being held.
-#
-# | Bit flag | Button            |
-# | -------- | ----------------- |
 
 @enum.unique
-class ButtonFlags(enum.Enum):
+class ButtonFlag(enum.IntEnum):
     CROSS             = 0x0001
     TRIANGLE          = 0x0002
     CIRCLE            = 0x0004
@@ -872,23 +805,84 @@ class ButtonFlags(enum.Enum):
     LEFT_STICK_CLICK  = 0x2000
     RIGHT_STICK_CLICK = 0x4000
 
-ButtonFlagsDescription = {
-        ButtonFlags.CROSS             : "Cross or A",
-        ButtonFlags.TRIANGLE          : "Triangle or Y",
-        ButtonFlags.CIRCLE            : "Circle or B",
-        ButtonFlags.SQUARE            : "Square or X",
-        ButtonFlags.D_PAD_LEFT        : "D-pad Left",
-        ButtonFlags.D_PAD_RIGHT       : "D-pad Right",
-        ButtonFlags.D_PAD_UP          : "D-pad Up",
-        ButtonFlags.D_PAD_DOWN        : "D-pad Down",
-        ButtonFlags.OPTIONS           : "Options or Menu",
-        ButtonFlags.L1                : "L1 or LB",
-        ButtonFlags.R1                : "R1 or RB",
-        ButtonFlags.L2                : "L2 or LT",
-        ButtonFlags.R2                : "R2 or RT",
-        ButtonFlags.LEFT_STICK_CLICK  : "Left Stick Click",
-        ButtonFlags.RIGHT_STICK_CLICK : "Right Stick Click"
-    }
+
+ButtonFlag.description = {
+    ButtonFlag.CROSS             : "Cross or A",
+    ButtonFlag.TRIANGLE          : "Triangle or Y",
+    ButtonFlag.CIRCLE            : "Circle or B",
+    ButtonFlag.SQUARE            : "Square or X",
+    ButtonFlag.D_PAD_LEFT        : "D-pad Left",
+    ButtonFlag.D_PAD_RIGHT       : "D-pad Right",
+    ButtonFlag.D_PAD_UP          : "D-pad Up",
+    ButtonFlag.D_PAD_DOWN        : "D-pad Down",
+    ButtonFlag.OPTIONS           : "Options or Menu",
+    ButtonFlag.L1                : "L1 or LB",
+    ButtonFlag.R1                : "R1 or RB",
+    ButtonFlag.L2                : "L2 or LT",
+    ButtonFlag.R2                : "R2 or RT",
+    ButtonFlag.LEFT_STICK_CLICK  : "Left Stick Click",
+    ButtonFlag.RIGHT_STICK_CLICK : "Right Stick Click"
+}
+
+##################################
+#                                #
+#  Decode UDP telemetry packets  #
+#                                #
+##################################
+
+# Map from (packetFormat, packetVersion, packetId) to a specific packet type.
+HeaderFieldsToPacketType = {
+    (2019, 1, 0) : PacketMotionData_V1,
+    (2019, 1, 1) : PacketSessionData_V1,
+    (2019, 1, 2) : PacketLapData_V1,
+    (2019, 1, 3) : PacketEventData_V1,
+    (2019, 1, 4) : PacketParticipantsData_V1,
+    (2019, 1, 5) : PacketCarSetupData_V1,
+    (2019, 1, 6) : PacketCarTelemetryData_V1,
+    (2019, 1, 7) : PacketCarStatusData_V1
+}
+
+
+def unpack_udp_packet(packet: bytes) -> PackedLittleEndianStructure:
+    """Convert raw UDP packet to an appropriately-typed telemetry packet.
+
+    Args:
+        packet: the contents of the UDP packet to be unpacked.
+
+    Returns:
+        The decoded packet structure.
+
+    Raises:
+        ValueError if a problem is detected.
+    """
+    actual_packet_size = len(packet)
+
+    header_size = ctypes.sizeof(PacketHeader)
+
+    if actual_packet_size < header_size:
+        raise ValueError("Bad telemetry packet: too short ({} bytes).".format(actual_packet_size))
+
+    header = PacketHeader.from_buffer_copy(packet)
+    key = (header.packetFormat, header.packetVersion, header.packetId)
+
+    if key not in HeaderFieldsToPacketType:
+        raise ValueError("Bad telemetry packet: no match for key fields {!r}.".format(key))
+
+    packet_type = HeaderFieldsToPacketType[key]
+
+    expected_packet_size = ctypes.sizeof(packet_type)
+
+    if actual_packet_size != expected_packet_size:
+        raise ValueError("Bad telemetry packet: bad size for {} packet; expected {} bytes but received {} bytes.".format(
+            packet_type.__name__, expected_packet_size, actual_packet_size))
+
+    return packet_type.from_buffer_copy(packet)
+
+#########################################################################
+#                                                                       #
+#  Verify packet sizes if this module is executed rather than imported  #
+#                                                                       #
+#########################################################################
 
 if __name__ == "__main__":
 

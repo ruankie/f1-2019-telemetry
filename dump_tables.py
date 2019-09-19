@@ -1,30 +1,33 @@
 #! /usr/bin/env python3
 
-from f1_2019_telemetry_packets import TeamIDs, DriverIDs, TrackIDs, NationalityIDs, SurfaceTypes, ButtonFlags, ButtonFlagsDescription
+"""This script dumps the F1 2019 telemetry tables in RST markup format."""
 
-def dump_table(items, labels, num_rows, num_cols=None):
+from f1_2019_telemetry_packets import PacketID, TeamIDs, DriverIDs, TrackIDs, NationalityIDs, SurfaceTypes, ButtonFlag, EventStringCode
+
+def dump_table(items, labels, num_rows=None, num_cols=None):
+
+	if num_rows is None:
+		num_rows = len(items)
 
 	if num_cols is None:
 		num_cols = (len(items) + num_rows - 1) // num_rows
 
 	labels = [str(label) for label in labels]
-	items = [(str(k), str(v)) for (k, v) in items]
+	items  = [tuple(str(x) for x in item) for item in items]
 
-	# determine column widths
+	# Determine column widths
 	column_widths = []
 	for col in range(num_cols):
-		width_k_column = len(labels[0])
-		width_v_column = len(labels[1])
+		widths = (len(x) for x in labels)
 		for row in range(num_rows):
 			idx = num_rows * col + row
 			if idx < len(items):
-				width_k_column = max(width_k_column, len(items[idx][0]))
-				width_v_column = max(width_v_column, len(items[idx][1]))
-		column_widths.append((width_k_column, width_v_column))
+				widths = tuple(max(w, len(x)) for (w, x) in zip(widths, items[idx]))
+		column_widths.append(widths)
 
 	# Ready to print
-	separator_line_1 = "+" + "+".join((wk + 2) * "-" + "+" + (wv + 2) *  "-"  for (wk, wv) in column_widths) + "+"
-	separator_line_2 = "+" + "+".join((wk + 2) * "=" + "+" + (wv + 2) *  "="  for (wk, wv) in column_widths) + "+"
+	separator_line_1 = "+" + "+".join("+".join((w + 2) * "-" for w in widths) for widths in column_widths) + "+"
+	separator_line_2 = "+" + "+".join("+".join((w + 2) * "=" for w in widths) for widths in column_widths) + "+"
 
 	print(separator_line_1)
 
@@ -50,13 +53,17 @@ def dump_table(items, labels, num_rows, num_cols=None):
 
 		print(separator_line_1)
 
+
 def main():
 
+	# This table is in the spec as given on the CodeMaster forum, but not in the module.
+	# Note that we added the 'uint32' type which is missing from the spec.
 	TypesAndDescriptions = [
 		( "uint8"  , "Unsigned 8-bit integer"  ),
 		( "int8"   , "Signed 8-bit integer"    ),
 		( "uint16" , "Unsigned 16-bit integer" ),
 		( "int16"  , "Signed 16-bit integer"   ),
+		( "uint32" , "Unsigned 32-bit integer" ),
 		( "float"  , "Floating point (32-bit)" ),
 		( "uint64" , "Unsigned 64-bit integer" )
 	]
@@ -64,21 +71,33 @@ def main():
 	dump_table(TypesAndDescriptions, ["Type", "Description"], len(TypesAndDescriptions))
 	print()
 
-	if False:
-		dump_table(sorted(TeamIDs.items()), ["ID", "Team"], 20)
-		print()
-		dump_table(sorted(DriverIDs.items()), ["ID", "Driver"], 30)
-		print()
-		dump_table(sorted(TrackIDs.items()), ["ID", "Track"], 25)
-		print()
-		dump_table(sorted(NationalityIDs.items()), ["ID", "Nationality"], 30)
-		print()
-		dump_table(sorted(SurfaceTypes.items()), ["ID", "Surface"], 12)
-		print()
+	PacketIDTable = [(PacketID.short_description[p], p.value, PacketID.long_description[p]) for p in PacketID]
+	dump_table(PacketIDTable, ["Packet Name", "Value", "Description"])
+	print()
 
-		ButtonFlagsTableEntries = [("0x{:04x}".format(k), v) for (k,v) in sorted((bf.value, ButtonFlagsDescription[bf]) for bf in ButtonFlags)]
-		dump_table(ButtonFlagsTableEntries, ["Bit flags", "Button"], len(ButtonFlagsTableEntries))
-		print()
+	EventStringCodeTable = [(EventStringCode.short_description[e], e.value.decode(), EventStringCode.long_description[e]) for e in EventStringCode]
+	dump_table(EventStringCodeTable, ["Event", "Code", "Description"])
+	print()
+
+	dump_table(sorted(TeamIDs.items()), ["ID", "Team"], 20)
+	print()
+
+	dump_table(sorted(DriverIDs.items()), ["ID", "Driver"], 30)
+	print()
+
+	dump_table(sorted(TrackIDs.items()), ["ID", "Track"])
+	print()
+
+	dump_table(sorted(NationalityIDs.items()), ["ID", "Nationality"], 30)
+	print()
+
+	dump_table(sorted(SurfaceTypes.items()), ["ID", "Surface"])
+	print()
+
+	ButtonFlagTable = [("0x{:04x}".format(k), v) for (k,v) in sorted((bf.value, ButtonFlag.description[bf]) for bf in ButtonFlag)]
+	dump_table(ButtonFlagTable, ["Bit flags", "Button"])
+	print()
+
 
 if __name__ == "__main__":
     main()
