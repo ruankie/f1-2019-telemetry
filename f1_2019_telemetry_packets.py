@@ -1,28 +1,29 @@
-"""F1 2019 UDP Telemetry Packets specification.
+"""F1 2019 UDP Telemetry Packets specification and parsing.
 
-This module is based on the CodeMasters Forum post documenting the packet format:
+This module is based on the CodeMasters Forum post documenting the F1 2019 packet format:
 
     https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
-The specification as given in the forum post has a handful of minor issues; these have been fixed here:
+The specification as given in the forum post has a few minor issues; these have been fixed here:
 
-- In the 'Types and Description' table, the type of the m_frameIdentifier field of the PacketHeader should be
-  present; 'uint', or preferably, 'uint32' (see remark below).
-- In the 'PacketHeader', table the type of the 'm_frameIdentifier' field is given as 'uint'.
-  For consistency with the other type names, this should be 'uint32'.
-- In the 'PacketMotionData' struct, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
-  refer to 'velocity' rather than 'acceleration'.
-- In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a typo; whenever this player is encountered
-  in the game, his name is given as "Wilhelm Kaufmann".
-- PacketID.long_description[PacketID.EVENT] describes a more limited version of the Event packet, suggesting that
-  it is only used for start-of-session and end-of-session events, as it was in F1 2018.
+(1) In the 'Type / Description' table, the type 'uint', (or preferably, 'uint32', ; see also remark (2) below),
+    should be listed as it is used  for the field 'm_frameIdentifier' of the 'PacketHeader' structure.
+(2) In the 'PacketHeader' structure, the type of the 'm_frameIdentifier' field is given as 'uint'.
+    For consistency with the other type names, this should be 'uint32'.
+(3) In the 'PacketMotionData' structure, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
+    refer to 'velocity' rather than 'acceleration'.
+(4) In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a typo; whenever this driver is encountered
+    in the game, his name is given as "Wilhelm Kaufmann".
 """
 
 import enum
 import ctypes
 
 class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
-    """The standard ctypes LittleEndianStructure, but tightly packed (no field padding), and with a proper repr() function."""
+    """The standard ctypes LittleEndianStructure, but tightly packed (no field padding), and with a proper repr() function.
+
+    This is the base type for all structures in the telemetry data.
+    """
     _pack_ = 1
 
     def __repr__(self):
@@ -57,7 +58,7 @@ class PacketHeader(PackedLittleEndianStructure):
 
 @enum.unique
 class PacketID(enum.IntEnum):
-    """Value as specified in the PacketHeader.packetId header field, to distinguish packet types."""
+    """Value as specified in the PacketHeader.packetId header field, used to distinguish packet types."""
     MOTION        = 0
     SESSION       = 1
     LAP_DATA      = 2
@@ -81,14 +82,14 @@ PacketID.short_description = {
 
 
 PacketID.long_description = {
-    PacketID.MOTION        : 'Contains motion data for all cars',
-    PacketID.SESSION       : 'General data about the session',
-    PacketID.LAP_DATA      : 'Lap time info for all cars in the session',
-    PacketID.EVENT         : 'Session start, session end, and other race events',
-    PacketID.PARTICIPANTS  : 'List of participants in the session',
-    PacketID.CAR_SETUPS    : 'Car setup info for cars in the race',
+    PacketID.MOTION        : 'Contains all motion data for player\'s car – only sent while player is in control',
+    PacketID.SESSION       : 'Data about the session – track, time left',
+    PacketID.LAP_DATA      : 'Data about all the lap times of cars in the session',
+    PacketID.EVENT         : 'Various notable events that happen during a session',
+    PacketID.PARTICIPANTS  : 'List of participants in the session, mostly relevant for multiplayer',
+    PacketID.CAR_SETUPS    : 'Packet detailing car setups for cars in the race',
     PacketID.CAR_TELEMETRY : 'Telemetry data for all cars',
-    PacketID.CAR_STATUS    : 'General car status info for all cars'
+    PacketID.CAR_STATUS    : 'Status data for all cars such as damage'
 }
 
 #########################################################
@@ -126,7 +127,7 @@ class PacketMotionData_V1(PackedLittleEndianStructure):
 
     There is additional data for the car being driven with the goal of being able to drive a motion platform setup.
 
-    N.B. For the normalised vectors below, to convert to float values divide by 32767.0f --- 16-bit signed values are
+    N.B. For the normalised vectors below, to convert to float values divide by 32767.0f – 16-bit signed values are
     used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.
 
     Frequency: Rate as specified in menus
