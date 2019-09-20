@@ -1,5 +1,42 @@
 #! /usr/bin/env python3
 
+"""This script captures F1 2019 telemetry packets (sent over UDP) and stores them into SQLite3 database files.
+
+One database file will contain all packets from one session.
+
+From UDP packet to database entry
+---------------------------------
+
+The data flow of UDP packets into the database is managed by 2 threads.
+
+PacketReceiver thread:
+
+  (1) The PacketReceiver thread does a select() to wait on incoming packets in the UDP socket.
+  (2) When woken up with the notification that a UDP packet is available for reading, it is actually read from the socket.
+  (3) The receiver thread calls the recorder_thread.record_packet() method with a TimedPacket containing
+      the reception timestamp and the packet just read.
+  (4) The recorder_thread.record_packet() method locks its packet queue, inserts the packet there,
+      then unlocks the queue. Note that this method is only called from within the receiver thread!
+  (5) repeat from (1).
+
+PacketRecorder thread:
+
+  (1) The PacketRecorder thread sleeps for a given period, then wakes up.
+  (2) It locks its packet queue, moves the queue's packets to a local variable, empties the packet queue,
+      then unlocks the packet queue.
+  (3) The packets just moved out of the queue are passed to the 'process_incoming_packets' method.
+  (4) The 'process_incoming_packets' method inspects the packet headers, and converts the packet data
+      into SessionPacket instances that are suitable for inserting into the database.
+      In the process, it collects packets from the same session. After collecting all
+      available packets from the same session, it passed them on to the
+      'process_incoming_same_session_packets' method.
+  (5) The 'process_incoming_same_session_packets' method makes sure that the appropriate SQLite database file
+      is opened (i.e., the one with matching sessionUID), then writes the packets into the 'packets' table.
+
+By decoupling the packet capture and database writing in different threads, we minimize the risk of
+dropping UDP packets. This risk is real because SQLite3 database commits can take a considerable time.
+"""
+
 import argparse
 import sys
 import time
@@ -12,55 +49,21 @@ import selectors
 
 from collections import namedtuple
 
-from f1_2019_telemetry_packets import PacketHeader, HeaderFieldsToPacketType, unpack_udp_packet
+from f1_2019_telemetry_packets import PacketHeader, PacketID, HeaderFieldsToPacketType, unpack_udp_packet
 
 TimestampedPacket = namedtuple('TimestampedPacket', 'timestamp, packet')
 
 SessionPacket = namedtuple('SessionPacket', 'timestamp, packetFormat, gameMajorVersion, gameMinorVersion, packetVersion, packetId, sessionUID, sessionTime, frameIdentifier, playerCarIndex, packet')
 
-# The 'recorder' program captures F1 2019 telemetry packets (sent by UDP) and stores them
-# into SQLite3 database files. One database file will contain all packets from one session.
-#
-# From UDP packet to database entry
-# ---------------------------------
-#
-# The data flow of UDP packets into the database is managed by 2 threads.
-#
-# PacketReceiver thread:
-#
-#     (1) The PacketReceiver thread does a select() to wait on incoming packets in the UDP socket.
-#     (2) When woken up with the notification that a UDP packet is available for reading, it is actually read from the socket.
-#     (3) The receiver thread calls recorder_thread.record_packet() with a TimedPacket containing the reception timestamp and the packet just read.
-#     (4) recorder_thread.record_packet() locks its packet queue, inserts the packet there, then unlocks the queue.
-#         Note that this method is only called from within the receiver thread!
-#     (5) repeat from (1).
-#
-# PacketRecorder thread:
-#
-#     (1) The PacketRecorder thread sleeps for a given period, then wakes up.
-#     (2) It locks its packet queue, moves the queue's packets to a local variable, empties the packet queue,
-#         then unlocks the packet queue.
-#     (3) The packets just moved out of the queue are passed to the 'process_incoming_packets' method.
-#     (4) The 'process_incoming_packets' method inspects the packet headers, and converts the packet data
-#         into SessionPacket instances that are suitable for inserting into the database.
-#         In the process, it collects packets from the same session. After collecting all
-#         available packets from the same session, it passed them on to the
-#         'process_incoming_same_session_packets' method.
-#     (5) The 'process_incoming_same_session_packets' method makes sure that the appropriate SQLite database file
-#         is opened (i.e., the one with matching sessionUID), then writes the packets into the 'packets' table.
-#
-# By decoupling the packet capture and database writing in different threads, we minimize the risk of
-# dropping UDP packets. This risk is real because SQLite3 database commits can take a considerable time.
 
 class PacketRecorder:
     """The PacketRecorder records incoming packets to SQLite3 database files.
 
-    Our design choice is that a single SQLite3 file stores packets from a single session.
+    A single SQLite3 file stores packets from a single session.
     Whenever a new session starts, any open file is closed, and a new database file is created.
     """
 
     # The SQLite3 query that creates the 'packets' table in the database file.
-
     _create_packets_table_query = """
         CREATE TABLE packets (
             pkt_id            INTEGER  PRIMARY KEY, -- Alias for SQLite3's 'rowid'.
@@ -79,7 +82,6 @@ class PacketRecorder:
         """
 
     # The SQLite3 query that inserts packet data into the 'packets' table of an open database file.
-
     _insert_packets_query = """
         INSERT INTO packets(
             timestamp,
@@ -140,29 +142,31 @@ class PacketRecorder:
         self._conn.commit()
 
     def _process_same_session_packets(self, same_session_packets):
+        """Insert packets from the same session into the 'packets' table of the appropriate database file.
 
-        # PRECONDITION: all packets in 'same_session_packets' are from the same session (identical 'sessionUID' field).
-        #
-        # We need to handle four different situations:
-        #
-        # (1) 'same_session_packets' is empty:
-        #
-        #     --> return (no-op).
-        #
-        # (2) A database file is currently open, but it stores packets with a different session UID:
-        #
-        #     --> Close database;
-        #     --> Open database with correct session UID;
-        #     --> Insert 'same_session_packets'.
-        #
-        # (3) No database file is currently open:
-        #
-        #     --> Open database with correct session UID;
-        #     --> Insert 'same_session_packets'.
-        #
-        # (4) A database is currently open, with correct session UID:
-        #
-        #     --> Insert 'same_session_packets'.
+        PRECONDITION: all packets in 'same_session_packets' are from the same session (identical 'sessionUID' field).
+
+        We need to handle four different cases:
+
+        (1) 'same_session_packets' is empty:
+
+            --> return (no-op).
+
+        (2) A database file is currently open, but it stores packets with a different session UID:
+
+            --> Close database;
+            --> Open database with correct session UID;
+            --> Insert 'same_session_packets'.
+
+        (3) No database file is currently open:
+        
+            --> Open database with correct session UID;
+            --> Insert 'same_session_packets'.
+        
+        (4) A database is currently open, with correct session UID:
+        
+            --> Insert 'same_session_packets'.
+        """
 
         if not same_session_packets:
             # Nothing to insert.
@@ -180,7 +184,6 @@ class PacketRecorder:
         self._insert_and_commit_same_session_packets(same_session_packets)
 
     def process_incoming_packets(self, timestamped_packets):
-
         """Process incoming packets by recording them into the correct database file.
 
         The incoming 'timestamped_packets' is a list of timestamped raw UDP packets.
@@ -193,7 +196,7 @@ class PacketRecorder:
         method that writes them into the appropriate database file.
         """
 
-        t1 = time.time()
+        t1 = time.monotonic()
 
         # Invariant to be guaranteed: all packets in 'same_session_packets' have the same 'sessionUID' field.
         same_session_packets = []
@@ -219,7 +222,7 @@ class PacketRecorder:
                     packet_type_tuple, len(packet), ctypes.sizeof(packet_type)))
                 continue
 
-            if h.packetId == 3:  # Log Event packets
+            if h.packetId == PacketID.EVENT:  # Log Event packets
                 event_packet = unpack_udp_packet(packet)
                 logging.info("Recording event packet: {}".format(event_packet.eventStringCode.decode()))
 
@@ -254,7 +257,7 @@ class PacketRecorder:
         self._process_same_session_packets(same_session_packets)
         same_session_packets.clear()
 
-        t2 = time.time()
+        t2 = time.monotonic()
 
         duration = (t2 - t1)
 
@@ -393,7 +396,7 @@ def main():
 
     # Configure logging.
 
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)-23s | %(threadName)-10s | %(levelname)-4s | %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)-23s | %(threadName)-10s | %(levelname)-5s | %(message)s")
     logging.Formatter.default_msec_format = '%s.%03d'
 
     # Parse command line arguments.

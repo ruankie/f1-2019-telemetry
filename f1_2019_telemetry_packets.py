@@ -128,7 +128,7 @@ class PacketMotionData_V1(PackedLittleEndianStructure):
 
     N.B. For the normalised vectors below, to convert to float values divide by 32767.0f --- 16-bit signed values are
     used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.
-    
+
     Frequency: Rate as specified in menus
     Size: 1343 bytes
     Version: 1
@@ -257,7 +257,7 @@ class PacketLapData_V1(PackedLittleEndianStructure):
 ########################################################
 
 class PacketEventData_V1(PackedLittleEndianStructure):
-    """This packet gives details of events that happen during the course of a session. 
+    """This packet gives details of events that happen during the course of a session.
 
     Frequency: When the event occurs
     Size: 32 bytes
@@ -386,7 +386,7 @@ class PacketCarSetupData_V1(PackedLittleEndianStructure):
 
     Note that in multiplayer games, other player cars will appear as blank, you will only be able to see your car setup and AI cars.
 
-    Frequency: 2 per second 
+    Frequency: 2 per second
     Size: 843 bytes
     Version: 1
     """
