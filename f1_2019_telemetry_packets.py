@@ -1,4 +1,4 @@
-"""F1 2019 UDP Telemetry Packets specification and parsing.
+"""F1 2019 UDP Telemetry Packets specification and unpacking.
 
 This module is based on the CodeMasters Forum post documenting the F1 2019 packet format:
 
@@ -12,12 +12,18 @@ The specification as given in the forum post has a few minor issues; these have 
     For consistency with the other type names, this should be 'uint32'.
 (3) In the 'PacketMotionData' structure, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
     refer to 'velocity' rather than 'acceleration'.
-(4) In the Driver IDs table, driver 34 has name "Wilheim Kaufmann". This is a typo; whenever this driver is encountered
-    in the game, his name is given as "Wilhelm Kaufmann".
+(4) In the Driver IDs table, driver 34 has name "Wilheim Kaufmann".
+    This is a typo; whenever this driver is encountered in the game, his name is given as "Wilhelm Kaufmann".
 """
 
-import enum
 import ctypes
+import enum
+
+#########################################################
+#                                                       #
+#  ----------  PackedLittleEndianStructure  ----------  #
+#                                                       #
+#########################################################
 
 class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
     """The standard ctypes LittleEndianStructure, but tightly packed (no field padding), and with a proper repr() function.
@@ -41,6 +47,12 @@ class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
         return "{}({})".format(self.__class__.__name__, ", ".join(fstr_list))
 
 
+###########################################
+#                                         #
+#  ----------  Packet Header  ----------  #
+#                                         #
+###########################################
+
 class PacketHeader(PackedLittleEndianStructure):
     """The header for each of the UDP telemetry packets."""
     _fields_ = [
@@ -59,6 +71,7 @@ class PacketHeader(PackedLittleEndianStructure):
 @enum.unique
 class PacketID(enum.IntEnum):
     """Value as specified in the PacketHeader.packetId header field, used to distinguish packet types."""
+
     MOTION        = 0
     SESSION       = 1
     LAP_DATA      = 2
@@ -268,11 +281,12 @@ class PacketEventData_V1(PackedLittleEndianStructure):
         ('header'          , PacketHeader     ),  # Header
         ('eventStringCode' , ctypes.c_char * 4),  # Event string code, see below
         # Event details - should be interpreted differently for each type
-        ('vehicleIdx'      , ctypes.c_uint8   ),  # Vehicle index of car    (valid for events: FTLP, RTMT, TMPT, RCWN)
-        ('lapTime'         , ctypes.c_float   )   # Lap time is in seconds  (valid for events: FTLP)
+        ('vehicleIdx'      , ctypes.c_uint8   ),  # Vehicle index of car (valid for events: FTLP, RTMT, TMPT, RCWN)
+        ('lapTime'         , ctypes.c_float   )   # Lap time is in seconds (valid for events: FTLP)
     ]
 
 
+@enum.unique
 class EventStringCode(enum.Enum):
     """Value as specified in the PacketEventData_V1.eventStringCode header field, used to distinguish packet types."""
     SSTA = b'SSTA'
@@ -790,6 +804,7 @@ SurfaceTypes = {
 
 @enum.unique
 class ButtonFlag(enum.IntEnum):
+    """Bit-mask values for the 'button' field in Car Telemetry Data packets."""
     CROSS             = 0x0001
     TRIANGLE          = 0x0002
     CIRCLE            = 0x0004
