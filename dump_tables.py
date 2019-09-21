@@ -9,7 +9,7 @@ def dump_table(items, labels, num_rows=None, num_cols=None):
 
     Args:
         items: a sequence of n-element items, to ne included in the table body.
-        labels: a sequence of n strings to be used as headers
+        labels: an optional sequence of n strings to be used as headers.
         num_rows: number of rows to be used. Defaults to the length of the 'items' sequence.
         num_cols: number of 'major' columns (each consisting of n 'minor' columns).
     """
@@ -39,14 +39,15 @@ def dump_table(items, labels, num_rows=None, num_cols=None):
 
     print(separator_line_1)
 
-    print("|", end='')
-    for (col, widths) in enumerate(column_widths):
-        for (label, width) in zip(labels, widths):
-            print(" " + label + (width - len(label) + 1) * " ", end='')
-            print("|", end='')
-    print()
+    if labels is not None:
+        print("|", end='')
+        for (col, widths) in enumerate(column_widths):
+            for (label, width) in zip(labels, widths):
+                print(" " + label + (width - len(label) + 1) * " ", end='')
+                print("|", end='')
+        print()
 
-    print(separator_line_2)
+        print(separator_line_2)
 
     for row in range(num_rows):
 
