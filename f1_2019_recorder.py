@@ -51,8 +51,10 @@ from collections import namedtuple
 
 from f1_2019_telemetry_packets import PacketHeader, PacketID, HeaderFieldsToPacketType, unpack_udp_packet
 
+# The type used by the PacketReceiverThread to represent incoming telemetry packets, with timestamp.
 TimestampedPacket = namedtuple('TimestampedPacket', 'timestamp, packet')
 
+# The type used by the PacketRecorderThread to represent incoming telemetry packets for storage in the SQLite3 database.
 SessionPacket = namedtuple('SessionPacket', 'timestamp, packetFormat, gameMajorVersion, gameMinorVersion, packetVersion, packetId, sessionUID, sessionTime, frameIdentifier, playerCarIndex, packet')
 
 
@@ -112,7 +114,7 @@ class PacketRecorder:
         # Get rid of indentation and superfluous newlines in the 'CREATE TABLE' command.
         query = "".join(line[8:] + "\n" for line in PacketRecorder._create_packets_table_query.split("\n")[1:-1])
 
-        # Try to execute the 'CREATE TABLE' statement. If it already existed, this will raise an exception.
+        # Try to execute the 'CREATE TABLE' statement. If it already exists, this will raise an exception.
         try:
             cursor.execute(query)
         except sqlite3.OperationalError:
@@ -145,7 +147,7 @@ class PacketRecorder:
     def _process_same_session_packets(self, same_session_packets):
         """Insert packets from the same session into the 'packets' table of the appropriate database file.
 
-        PRECONDITION: all packets in 'same_session_packets' are from the same session (identical 'sessionUID' field).
+        Precondition: all packets in 'same_session_packets' are from the same session (identical 'sessionUID' field).
 
         We need to handle four different cases:
 
@@ -227,8 +229,7 @@ class PacketRecorder:
                 event_packet = unpack_udp_packet(packet)
                 logging.info("Recording event packet: {}".format(event_packet.eventStringCode.decode()))
 
-            # NOTE: the sessionUID is not reliable at the start of a session!
-            # We need to figure out a way to deal with this.
+            # NOTE: the sessionUID is not reliable at the start of a session (in F1 2018, need to check for F1 2019).
             # See: http://forums.codemasters.com/discussion/138130/bug-f1-2018-pc-v1-0-4-udp-telemetry-bad-session-uid-in-first-few-packets-of-a-session
 
             # Create an INSERT-able tuple for the data in this packet.
@@ -246,7 +247,7 @@ class PacketRecorder:
             )
 
             if len(same_session_packets) > 0 and same_session_packets[0].sessionUID != session_packet.sessionUID:
-                # Write 'same_session_packets' to the correct session database, then forget about them.
+                # Write 'same_session_packets' collected so far to the correct session database, then forget about them.
                 self._process_same_session_packets(same_session_packets)
                 same_session_packets.clear()
 
@@ -263,7 +264,7 @@ class PacketRecorder:
 
         duration = (t2 - t1)
 
-        logging.info("Recorded {} packets in {:.3f} ms.".format(len(timestamped_packets), duration * 1e3))
+        logging.info("Recorded {} packets in {:.3f} ms.".format(len(timestamped_packets), duration * 1000.0))
 
     def no_packets_received(self, age: float) -> None:
         """No packets were received for a considerable time. If a database file is open, close it."""
@@ -377,7 +378,7 @@ class PacketReceiverThread(threading.Thread):
             for (key, events) in selector.select():
                 timestamp = time.time()
                 if key == key_udp_socket:
-                    # All UDP packets fit in 2048 bytes with room to spare.
+                    # All telemetry UDP packets fit in 2048 bytes with room to spare.
                     packet = udp_socket.recv(2048)
                     timestamped_packet = TimestampedPacket(timestamp, packet)
                     self._recorder_thread.record_packet(timestamped_packet)
