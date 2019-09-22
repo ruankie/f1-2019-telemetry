@@ -97,10 +97,11 @@ class PacketRecorder:
         self._sessionUID = None
 
     def close(self):
+        """Make sure that no database remains open."""
         if self._conn is not None:
             self._close_database()
 
-    def _open_database(self, sessionUID):
+    def _open_database(self, sessionUID: str):
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
         filename = "F1_2019_{:s}.sqlite3".format(sessionUID)
@@ -159,12 +160,12 @@ class PacketRecorder:
             --> Insert 'same_session_packets'.
 
         (3) No database file is currently open:
-        
+
             --> Open database with correct session UID;
             --> Insert 'same_session_packets'.
-        
+
         (4) A database is currently open, with correct session UID:
-        
+
             --> Insert 'same_session_packets'.
         """
 
@@ -207,9 +208,9 @@ class PacketRecorder:
                 logging.error("Dropped bad packet of size {} (too short).".format(len(packet)))
                 continue
 
-            h = PacketHeader.from_buffer_copy(packet)
+            header = PacketHeader.from_buffer_copy(packet)
 
-            packet_type_tuple = (h.packetFormat, h.packetVersion, h.packetId)
+            packet_type_tuple = (header.packetFormat, header.packetVersion, header.packetId)
 
             packet_type = HeaderFieldsToPacketType.get(packet_type_tuple)
             if packet_type is None:
@@ -218,11 +219,11 @@ class PacketRecorder:
 
             if len(packet) != ctypes.sizeof(packet_type):
                 logging.error("Dropped packet with unexpected size; "
-                    "(format, version, id) = {!r} packet, size = {}, expected {}.".format(
-                    packet_type_tuple, len(packet), ctypes.sizeof(packet_type)))
+                              "(format, version, id) = {!r} packet, size = {}, expected {}.".format(
+                                  packet_type_tuple, len(packet), ctypes.sizeof(packet_type)))
                 continue
 
-            if h.packetId == PacketID.EVENT:  # Log Event packets
+            if header.packetId == PacketID.EVENT:  # Log Event packets
                 event_packet = unpack_udp_packet(packet)
                 logging.info("Recording event packet: {}".format(event_packet.eventStringCode.decode()))
 
@@ -237,11 +238,12 @@ class PacketRecorder:
             # To prevent any issues, we represent the sessionUID as a 16-digit hex string instead.
 
             session_packet = SessionPacket(
-                    timestamp,
-                    h.packetFormat, h.gameMajorVersion, h.gameMinorVersion, h.packetVersion, h.packetId, "{:016x}".format(h.sessionUID),
-                    h.sessionTime, h.frameIdentifier, h.playerCarIndex,
-                    packet
-                )
+                timestamp,
+                header.packetFormat, header.gameMajorVersion, header.gameMinorVersion,
+                header.packetVersion, header.packetId, "{:016x}".format(header.sessionUID),
+                header.sessionTime, header.frameIdentifier, header.playerCarIndex,
+                packet
+            )
 
             if len(same_session_packets) > 0 and same_session_packets[0].sessionUID != session_packet.sessionUID:
                 # Write 'same_session_packets' to the correct session database, then forget about them.
@@ -273,6 +275,7 @@ class PacketRecorder:
 
 
 class PacketRecorderThread(threading.Thread):
+    """The PacketRecorderThread writes telemetry data to SQLite3 files."""
 
     def __init__(self, record_interval):
         super().__init__(name='recorder')
@@ -324,22 +327,23 @@ class PacketRecorderThread(threading.Thread):
         recorder.close()
 
         selector.close()
-        for fd in self._socketpair:
-            fd.close()
+        for sock in self._socketpair:
+            sock.close()
 
         logging.info("Recorder thread stopped.")
 
     def request_quit(self):
-        # Called from the main thread to request that we quit.
+        """Called from the main thread to request that we quit."""
         self._socketpair[0].send(b'\x00')
 
     def record_packet(self, timestamped_packet):
-        # Called from the receiver thread for every UDP packet received.
+        """Called from the receiver thread for every UDP packet received."""
         with self._packets_lock:
             self._packets.append(timestamped_packet)
 
 
 class PacketReceiverThread(threading.Thread):
+    """The PacketReceiverThread receives incoming telemetry packets via the network and passes them to the PacketRecorderThread for storage."""
 
     def __init__(self, udp_port, recorder_thread):
         super().__init__(name='receiver')
@@ -349,7 +353,7 @@ class PacketReceiverThread(threading.Thread):
 
     def run(self):
 
-        udp_socket = socket.socket(family = socket.AF_INET, type = socket.SOCK_DGRAM)
+        udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
         # Allow multiple receiving endpoints.
         if sys.platform in ['darwin']:
@@ -382,17 +386,18 @@ class PacketReceiverThread(threading.Thread):
 
         selector.close()
         udp_socket.close()
-        for fd in self._socketpair:
-            fd.close()
+        for sock in self._socketpair:
+            sock.close()
 
         logging.info("Receiver thread stopped.")
 
     def request_quit(self):
-        # Called from the main thread to request that we quit.
+        """Called from the main thread to request that we quit."""
         self._socketpair[0].send(b'\x00')
 
 
 def main():
+    """Record incoming telemetry data until the user presses enter."""
 
     # Configure logging.
 
@@ -418,9 +423,9 @@ def main():
 
     # Receiver and recorder are now active. Wait until the user asks us to quit.
 
-    logging.info("Press [Enter] to quit.")
+    logging.info("Main thread going to sleep, press Enter key to quit.")
     input()
-    logging.info("[Enter] received, quitting ...")
+    logging.info("Main thread received Enter key, quitting ...")
 
     # Stop receiver thread first, then recorder thread.
 
