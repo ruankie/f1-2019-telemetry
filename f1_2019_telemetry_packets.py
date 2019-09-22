@@ -4,10 +4,10 @@ This module is based on the CodeMasters Forum post documenting the F1 2019 packe
 
     https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
-The specification as given in the forum post has a few minor issues; these have been fixed here:
+The specification as given there has a few minor issues; these have been fixed here:
 
 (1) In the 'Type / Description' table, the type 'uint', (or preferably, 'uint32', ; see also remark (2) below),
-    should be listed as it is used  for the field 'm_frameIdentifier' of the 'PacketHeader' structure.
+    should be listed as it is used for the field 'm_frameIdentifier' of the 'PacketHeader' structure.
 (2) In the 'PacketHeader' structure, the type of the 'm_frameIdentifier' field is given as 'uint'.
     For consistency with the other type names, this should be 'uint32'.
 (3) In the 'PacketMotionData' structure, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
