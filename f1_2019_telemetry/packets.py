@@ -1,6 +1,6 @@
-"""F1 2019 UDP Telemetry Packets specification and unpacking.
+"""F1 2019 UDP Telemetry support package
 
-This module is based on the CodeMasters Forum post documenting the F1 2019 packet format:
+This package is based on the CodeMasters Forum post documenting the F1 2019 packet format:
 
     https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
@@ -21,7 +21,7 @@ import enum
 
 #########################################################
 #                                                       #
-#  ----------  PackedLittleEndianStructure  ----------  #
+#  __________  PackedLittleEndianStructure  __________  #
 #                                                       #
 #########################################################
 
@@ -49,7 +49,7 @@ class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
 
 ###########################################
 #                                         #
-#  ----------  Packet Header  ----------  #
+#  __________  Packet Header  __________  #
 #                                         #
 ###########################################
 
@@ -107,7 +107,7 @@ PacketID.long_description = {
 
 #########################################################
 #                                                       #
-#  ----------  Packet ID 0 : MOTION PACKET  ----------  #
+#  __________  Packet ID 0 : MOTION PACKET  __________  #
 #                                                       #
 #########################################################
 
@@ -170,7 +170,7 @@ class PacketMotionData_V1(PackedLittleEndianStructure):
 
 ##########################################################
 #                                                        #
-#  ----------  Packet ID 1 : SESSION PACKET  ----------  #
+#  __________  Packet ID 1 : SESSION PACKET  __________  #
 #                                                        #
 ##########################################################
 
@@ -219,7 +219,7 @@ class PacketSessionData_V1(PackedLittleEndianStructure):
 
 ###########################################################
 #                                                         #
-#  ----------  Packet ID 2 : LAP DATA PACKET  ----------  #
+#  __________  Packet ID 2 : LAP DATA PACKET  __________  #
 #                                                         #
 ###########################################################
 
@@ -266,7 +266,7 @@ class PacketLapData_V1(PackedLittleEndianStructure):
 
 ########################################################
 #                                                      #
-#  ----------  Packet ID 3 : EVENT PACKET  ----------  #
+#  __________  Packet ID 3 : EVENT PACKET  __________  #
 #                                                      #
 ########################################################
 
@@ -327,7 +327,7 @@ EventStringCode.long_description = {
 
 ###############################################################
 #                                                             #
-#  ----------  Packet ID 4 : PARTICIPANTS PACKET  ----------  #
+#  __________  Packet ID 4 : PARTICIPANTS PACKET  __________  #
 #                                                             #
 ###############################################################
 
@@ -366,7 +366,7 @@ class PacketParticipantsData_V1(PackedLittleEndianStructure):
 
 #############################################################
 #                                                           #
-#  ----------  Packet ID 5 : CAR SETUPS PACKET  ----------  #
+#  __________  Packet ID 5 : CAR SETUPS PACKET  __________  #
 #                                                           #
 #############################################################
 
@@ -412,7 +412,7 @@ class PacketCarSetupData_V1(PackedLittleEndianStructure):
 
 ################################################################
 #                                                              #
-#  ----------  Packet ID 6 : CAR TELEMETRY PACKET  ----------  #
+#  __________  Packet ID 6 : CAR TELEMETRY PACKET  __________  #
 #                                                              #
 ################################################################
 
@@ -455,7 +455,7 @@ class PacketCarTelemetryData_V1(PackedLittleEndianStructure):
 
 #############################################################
 #                                                           #
-#  ----------  Packet ID 7 : CAR STATUS PACKET  ----------  #
+#  __________  Packet ID 7 : CAR STATUS PACKET  __________  #
 #                                                           #
 #############################################################
 
