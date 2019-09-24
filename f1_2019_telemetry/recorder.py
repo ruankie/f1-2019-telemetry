@@ -49,7 +49,7 @@ import selectors
 
 from collections import namedtuple
 
-from f1_2019_telemetry_packets import PacketHeader, PacketID, HeaderFieldsToPacketType, unpack_udp_packet
+from f1_2019_telemetry.packets import PacketHeader, PacketID, HeaderFieldsToPacketType, unpack_udp_packet
 
 # The type used by the PacketReceiverThread to represent incoming telemetry packets, with timestamp.
 TimestampedPacket = namedtuple('TimestampedPacket', 'timestamp, packet')

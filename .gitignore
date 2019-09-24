@@ -1,2 +1,3 @@
-*.sqlite3
+docs/build
+*.whl
 __pycache__
