@@ -9,4 +9,4 @@ fi
 
 export PATH=$LOCAL_PYTHON3_BIN:$PATH
 
-python3 -m f1_2019_telemetry.recorder
+exec f1-2019-telemetry-recorder
