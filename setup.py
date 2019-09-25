@@ -16,7 +16,7 @@ race sessions, and to show data on a currently running race session.
 setup(
 
     name="f1-2019-telemetry",
-    version="1.0.0",
+    version="1.0.1",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",

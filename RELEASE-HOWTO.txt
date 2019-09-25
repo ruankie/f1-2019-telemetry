@@ -13,3 +13,16 @@
 (4c) Announce to f1 2019 list.
 
 (5) Document the process and gotchas.
+
+
+=========== Release procedure:
+
+(1) Edit docs/source/conf.py, README.md, and setup.py to bump version number.
+
+    Note that in README.md, the version number occurs multiple times.
+
+(2) Do a commit of the current state of the repository, and tag it.
+
+(3) Run the 'make-dist.sh' script.
+
+(4) Run the 'upload-dist.sh' script.
