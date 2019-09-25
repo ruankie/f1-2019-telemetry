@@ -4,7 +4,7 @@
 
 import argparse
 
-from f1_2019_telemetry import PacketID, TeamIDs, DriverIDs, TrackIDs, NationalityIDs, SurfaceTypes, ButtonFlag, EventStringCode
+from f1_2019_telemetry.packets import PacketID, TeamIDs, DriverIDs, TrackIDs, NationalityIDs, SurfaceTypes, ButtonFlag, EventStringCode
 
 def dump_table_rst(items, labels, num_rows=None, num_cols=None):
     """Dump a number of items as an RST markup table.

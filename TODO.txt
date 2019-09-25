@@ -1,22 +1,15 @@
 
-* Make a basic wheel package.
-* Install it in the local_python.
-* Check that the install installs everything we want.
-* Test that the package can be found.
-* Test that the recorder works.
-* Test that the player works.
-* Make documentation
+(1a) Test that the recorder works.
+(1b) Test that the player works.
+(1c) Implement and test the monitor.
 
+(2)  Improve documentation.
 
-* Figure out how to handle scripts (like player and recorder)
-* Check how package name (hyphens) and import name (underscore) interact.
+(3a) Final readthrough of the code (Pepijn?)
+(3b) Final readthrough of documentation
 
+(4a) Upload documentation to readthedocs
+(4b) Upload the package to PyPI
+(4c) Announce to f1 2019 list.
 
-* Final readthrough of code
-* Final readthrough of docs
-* Upload documentation to readthedocs
-* Upload the package to PyPI
-* Announce to f1 2019 list.
-
-
-* Document the process and gotchas.
+(5) Document the process and gotchas.

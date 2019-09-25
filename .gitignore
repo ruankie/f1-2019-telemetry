@@ -1,5 +1,6 @@
-docs/build
-*.whl
 __pycache__
+docs/build
+docs/source/generated
+*.whl
 *.sqlite3
 *.pyc
