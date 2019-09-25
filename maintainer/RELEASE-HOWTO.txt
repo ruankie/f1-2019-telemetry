@@ -1,28 +1,29 @@
 
-(1a) Test that the recorder works.
-(1b) Test that the player works.
-(1c) Implement and test the monitor.
+(1)  Improve the monitor to do something useful.
 
 (2)  Improve documentation.
 
 (3a) Final readthrough of the code (Pepijn?)
-(3b) Final readthrough of documentation
+(3b) Final readthrough of documentation (Pepijn?)
 
-(4a) Upload documentation to readthedocs
-(4b) Upload the package to PyPI
+(4a) Upload the package to PyPI
+(4b) Upload documentation to readthedocs
 (4c) Announce to f1 2019 list.
 
-(5) Document the process and gotchas.
-
+(5) Document the process release and gotchas.
 
 =========== Release procedure:
 
-(1) Edit docs/source/conf.py, README.md, and setup.py to bump version number.
+(1) Edit README.md, and setup.py, and docs/source/conf.py to bump version number.
 
     Note that in README.md, the version number occurs multiple times.
 
-(2) Do a commit of the current state of the repository, and tag it.
+(2) Do a commit of the current state of the Git repository, and tag it.
 
-(3) Run the 'make-dist.sh' script.
+(3) Run the 'maintainer/make-dist.sh' script.
 
-(4) Run the 'upload-dist.sh' script.
+(4) Run the 'maintainer/upload-dist.sh' script.
+
+(5) Run the 'maintainer/make-docs.sh' script.
+
+(6) Run the 'maintainer/upload-docs.sh' script.
