@@ -2,7 +2,11 @@
 
 """This script dumps the F1 2019 telemetry tables in RST or MarkDown format."""
 
+import os
+import sys
 import argparse
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..')))
 
 from f1_2019_telemetry.packets import PacketID, TeamIDs, DriverIDs, TrackIDs, NationalityIDs, SurfaceTypes, ButtonFlag, EventStringCode
 

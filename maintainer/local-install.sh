@@ -11,4 +11,4 @@ export PATH=$LOCAL_PYTHON3_BIN:$PATH
 
 pip3 uninstall -y f1-2019-telemetry
 
-pip3 install *.whl
+pip3 install dist/*.whl
