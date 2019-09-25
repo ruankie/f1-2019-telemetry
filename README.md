@@ -42,12 +42,10 @@ Description of toplevel project files and directories
 | README.md          | README file for the Git project                                                               |
 | LICENSE            | Project license (MIT)                                                                         |
 | TODO.txt           | TODO file before the package is ready for distribution                                        |
-| ------------------ | --------------------------------------------------------------------------------------------- |
 | setup.py           | Setup file for creating distributions                                                         |
 | dump_tables.py     | Python script to create ReST and Markdown style tables from data used in the specification    |
 | docs/              | Documentation of the project (based on Sphinx)                                                |
 | f1_2019_telemetry/ | The main package of the project                                                               |
-| ------------------ | --------------------------------------------------------------------------------------------- |
 | make-wheel.sh      | Maintainer script to build a wheel distribution file using a local Python 3 instance          |
 | local-install.sh   | Maintainer script to install the wheel distribution file to a local Python 3 instance         |
 | make-docs.sh       | Maintainer script to build the documentation using a local Python 3 instance                  |
