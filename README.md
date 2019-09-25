@@ -37,7 +37,6 @@ Both the package and the documentation are currently at version **1.0.0**.
 Description of toplevel project files and directories
 -----------------------------------------------------
 
-| ------------------ | --------------------------------------------------------------------------------------------- |
 | name               | description                                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------- |
 | README.md          | README file for the Git project                                                               |
@@ -53,4 +52,3 @@ Description of toplevel project files and directories
 | local-install.sh   | Maintainer script to install the wheel distribution file to a local Python 3 instance         |
 | make-docs.sh       | Maintainer script to build the documentation using a local Python 3 instance                  |
 | run-recorder.sh    | Maintainer script to run the f1-2019-telemetry-recorder script from a local Python 3 instance |
-| ------------------ | --------------------------------------------------------------------------------------------- |
