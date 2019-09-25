@@ -22,7 +22,7 @@ This allows installation using the standard Python _pip_ tool as follows:
 
 The project is hosted on Github: http://www.github.com/sidneycadot/f1-2019-telemetry/
 
-The PyPI page for the package is here: http://f1-telemetry-2019.pypi/
+The PyPI page for the package is here: https://pypi.org/project/f1-2019-telemetry/1.0.0/
 
 The package documentation can be read here: http://f1-telemetry-2019.readthedocs.io/
 
