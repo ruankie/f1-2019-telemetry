@@ -3,14 +3,15 @@
 from setuptools import setup, find_packages
 
 long_description=\
-"""This package provides functionality to handle UDP telemetry data from the F1 2019 game.
+"""This package provides functionality to handle UDP telemetry data as sent by the F1 2019 game.
 
-The F1 2019 game can optionally send UDP packets containing data for an ongoing race. The format
-of these packets is documented by CodeMasters. This package provides ctype-based definitions of
-all packet types that the program may send.
+The F1 2019 game can send UDP packets containing live data for an ongoing race.
+The format of these packets is documented by CodeMasters.
+This package provides ctype-based definitions of all packet types that the game sends.
 
-Apart from that, this package also provides some command line tools to record and playback
-race sessions, and to show data on a currently running race session.
+In addition to that, the package also provides command line tools to record, playback,
+and monitor race sessions. These tools are useful by themselves, but also serve as
+examples of how to capture and decode live game data in Python.
 """
 
 setup(
@@ -21,7 +22,7 @@ setup(
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
 
-    description="A package to handle UDP telemetry data from the F1 2019 game.",
+    description="A package to handle UDP telemetry data as sent by the F1 2019 game.",
     long_description=long_description,
     long_description_content_type="text/plain",
 
