@@ -285,11 +285,18 @@ class PacketRecorderThread(threading.Thread):
         self._packets_lock = threading.Lock()
         self._socketpair = socket.socketpair()
 
+    def close(self):
+        for sock in self._socketpair:
+            sock.close()
+
     def run(self):
-        """The run method executes in its own thread."""
+        """Receive incoming packets and hand them over the the PacketRecorder.
+
+        This method runs in its own thread.
+        """
 
         selector = selectors.DefaultSelector()
-        key_socketpair = selector.register(self._socketpair[1], selectors.EVENT_READ)
+        key_socketpair = selector.register(self._socketpair[0], selectors.EVENT_READ)
 
         recorder = PacketRecorder()
 
@@ -328,14 +335,15 @@ class PacketRecorderThread(threading.Thread):
         recorder.close()
 
         selector.close()
-        for sock in self._socketpair:
-            sock.close()
 
         logging.info("Recorder thread stopped.")
 
     def request_quit(self):
-        """Called from the main thread to request that we quit."""
-        self._socketpair[0].send(b'\x00')
+        """Request termination of the PacketRecorderThread.
+
+        Called from the main thread to request that we quit.
+        """
+        self._socketpair[1].send(b'\x00')
 
     def record_packet(self, timestamped_packet):
         """Called from the receiver thread for every UDP packet received."""
@@ -352,7 +360,15 @@ class PacketReceiverThread(threading.Thread):
         self._recorder_thread = recorder_thread
         self._socketpair = socket.socketpair()
 
+    def close(self):
+        for sock in self._socketpair:
+            sock.close()
+
     def run(self):
+        """Receive incoming packets and hand them over to the PacketRecorderThread.
+
+        This method runs in its own thread.
+        """
 
         udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
@@ -369,7 +385,7 @@ class PacketReceiverThread(threading.Thread):
         selector = selectors.DefaultSelector()
 
         key_udp_socket = selector.register(udp_socket, selectors.EVENT_READ)
-        key_socketpair = selector.register(self._socketpair[1], selectors.EVENT_READ)
+        key_socketpair = selector.register(self._socketpair[0], selectors.EVENT_READ)
 
         logging.info("Receiver thread started, reading UDP packets from port {}.".format(self._udp_port))
 
@@ -393,8 +409,68 @@ class PacketReceiverThread(threading.Thread):
         logging.info("Receiver thread stopped.")
 
     def request_quit(self):
+        """Request termination of the PacketReceiverThread.
+
+        Called from the main thread to request that we quit.
+        """
+        self._socketpair[1].send(b'\x00')
+
+
+class WaitConsoleThread(threading.Thread):
+    """The WaitConsoleThread runs until console input is available (or it is asked to quit before)."""
+
+    def __init__(self, quit_notifier):
+        super().__init__(name='console')
+        self._quit_notifier = quit_notifier
+        self._socketpair = socket.socketpair()
+
+    def close(self):
+        for sock in self._socketpair:
+            sock.close()
+
+    def run(self):
+        """Wait until stdin has input.
+
+        The run method executes in its own thread.
+        """
+        selector = selectors.DefaultSelector()
+        key_socketpair = selector.register(self._socketpair[0], selectors.EVENT_READ)
+        key_stdin      = selector.register(sys.stdin, selectors.EVENT_READ)
+
+        logging.info("Console wait thread started.")
+
+        quitflag = None
+        while not quitflag:
+            for (key, events) in selector.select():
+                if key == key_socketpair:
+                    quitflag = True
+                elif key == key_stdin:
+                    quitflag = True
+
+        self._quit_notifier.request_quit()
+
+        logging.info("Console wait thread stopped.")
+
+    def request_quit(self):
         """Called from the main thread to request that we quit."""
-        self._socketpair[0].send(b'\x00')
+        self._socketpair[1].send(b'\x00')
+
+
+class QuitNotifier:
+
+    def __init__(self):
+        self._quit_requested = False
+        self._cv = threading.Condition(threading.Lock())
+
+    def request_quit(self):
+        with self._cv:
+            self._quit_requested = True
+            self._cv.notify_all()
+
+    def wait(self):
+        with self._cv:
+            while not self._quit_requested:
+                self._cv.wait()
 
 
 def main():
@@ -416,25 +492,30 @@ def main():
 
     # Start recorder thread first, then receiver thread.
 
+    quit_notifier = QuitNotifier()
+
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
 
     receiver_thread = PacketReceiverThread(args.port, recorder_thread)
     receiver_thread.start()
 
-    # Receiver and recorder are now active. Wait until the user asks us to quit.
+    wait_console_thread = WaitConsoleThread(quit_notifier)
+    wait_console_thread.start()
 
-    logging.info("Main thread going to sleep, press Enter key to quit.")
-    input()
-    logging.info("Main thread received Enter key, quitting ...")
+    # Recorder, receiver, and wait_console threads are now active. Wait until any us to quit.
+
+    quit_notifier.wait()
 
     # Stop receiver thread first, then recorder thread.
 
     receiver_thread.request_quit()
     receiver_thread.join()
+    receiver_thread.close()
 
     recorder_thread.request_quit()
     recorder_thread.join()
+    recorder_thread.close()
 
     # All done.
 
