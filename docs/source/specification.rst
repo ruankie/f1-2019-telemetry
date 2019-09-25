@@ -4,21 +4,21 @@ F1 2019 Telemetry Packet Specification
 
 .. note::
 
-   This specification was copied (with minor editorial changes) from the CodeMasters forum posts describing the F1 2019 telemetry UDP packet specification as found here:
+   This specification was copied (with minor editorial changes) from the CodeMasters forum topic describing the F1 2019 telemetry UDP packet specification as found here:
 
    https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
-   There is one post detailing packet formats, and another post with appendices, giving a number of lookup tables.
-   Both have been reproduced here.
+   The forum post has one post detailing packet formats, followed by a post with Frequenctly Asked Questions, followed by a post with appendices, giving a number of lookup tables.
+   The package format and appendices have been reproduced here. For the FAQ, refer to the original forum topic.
 
    The following corrections were made in the process of copying the specification:
 
    * Added `uint32` type to the `Packet Types` table;
    * Changed type of field `m_frameIdentifier` in the `PacketHeader` struct from `uint` to `uint32`;
-   * In struct `PacketMotionData`: changed comments of the fields `m_angularAccelerationX`, `m_angularAccelerationY`,
+   * In struct `PacketMotionData`: corrected comments of the fields `m_angularAccelerationX`, `m_angularAccelerationY`,
      and `m_angularAccelerationZ` to reflect that the values represent accelerations rather than velocities.
-   * In struct `CarSetupData`: changed comment of field `m_rearAntiRollBar` to refer to `rear` instead of `front`.
-   * In the Driver IDs appendix: changed the name of driver `Wilheim Kaufmann` to `Wilhelm Kaufmann`.
+   * In struct `CarSetupData`: corrected comment of field `m_rearAntiRollBar` to refer to `rear` instead of `front`.
+   * In the Driver IDs appendix: corrected the name of driver `Wilheim Kaufmann` to `Wilhelm Kaufmann`.
 
 The F1 series of games support the output of certain game data across UDP connections.
 This data can be used supply race information to external applications, or to drive certain hardware (e.g. motion platforms, force feedback steering wheels and LED devices).
@@ -115,11 +115,9 @@ The motion packet gives physics data for all the cars being driven. There is add
 
 *N.B. For the normalised vectors below, to convert to float values divide by 32767.0f – 16-bit signed values are used to pack the data and on the assumption that direction values are always between -1.0f and 1.0f.*
 
-Frequency: Rate as specified in menus
-
-Size: 1343 bytes
-
-Version: 1
+| Frequency: Rate as specified in menus
+| Size: 1343 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -175,11 +173,9 @@ Session Packet
 
 The session packet includes details about the current session in progress.
 
-Frequency: 2 per second
-
-Size: 149 bytes
-
-Version: 1
+| Frequency: 2 per second
+| Size: 149 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -225,11 +221,9 @@ Lap Data Packet
 
 The lap data packet gives details of all the cars in the session.
 
-Frequency: Rate as specified in menus
-
-Size: 843 bytes
-
-Version: 1
+| Frequency: Rate as specified in menus
+| Size: 843 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -272,11 +266,9 @@ Event Packet
 
 This packet gives details of events that happen during the course of a session.
 
-Frequency: When the event occurs
-
-Size: 32 bytes
-
-Version: 1
+| Frequency: When the event occurs
+| Size: 32 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -310,7 +302,7 @@ Version: 1
    struct PacketEventData
    {
        PacketHeader     m_header;               // Header
-    
+
        uint8            m_eventStringCode[4];   // Event string code, see below
        EventDataDetails m_eventDetails;         // Event details - should be interpreted differently
                                                 // for each type
@@ -354,11 +346,9 @@ N.B. on Xbox One, the names will always be the driver name, on PS4 the name will
 
 The array should be indexed by vehicle index.
 
-Frequency: Every 5 seconds
-
-Size: 1104 bytes
-
-Version: 1
+| Frequency: Every 5 seconds
+| Size: 1104 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -390,11 +380,9 @@ Car Setups Packet
 This packet details the car setups for each vehicle in the session.
 Note that in multiplayer games, other player cars will appear as blank, you will only be able to see your car setup and AI cars.
 
-Frequency: 2 per second
-
-Size: 843 bytes
-
-Version: 1
+| Frequency: 2 per second
+| Size: 843 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -436,11 +424,9 @@ Car Telemetry Packet
 This packet details telemetry for all the cars in the race.
 It details various values that would be recorded on the car such as speed, throttle application, DRS etc.
 
-Frequency: Rate as specified in menus
-
-Size: 1347 bytes
-
-Version: 1
+| Frequency: Rate as specified in menus
+| Size: 1347 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -480,11 +466,9 @@ Car Status Packet
 This packet details car statuses for all the cars in the race.
 It includes values such as the damage readings on the car.
 
-Frequency: Rate as specified in menus
-
-Size: 1143 bytes
-
-Version: 1
+| Frequency: Rate as specified in menus
+| Size: 1143 bytes
+| Version: 1
 
 .. code-block:: c
 
@@ -550,7 +534,7 @@ Note: You can always see the data for the car you are driving regardless of the 
 
 The following data items are set to zero if the player driving the car in question has their “Your Telemetry” set to “Restricted”:
 
-Car status packet
+.. rubric:: Car status packet
 
 * m_fuelInTank
 * m_fuelCapacity
