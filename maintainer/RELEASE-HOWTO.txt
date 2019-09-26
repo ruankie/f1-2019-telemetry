@@ -1,4 +1,7 @@
 
+Checklist until first release
+=============================
+
 (1)  Improve the monitor to do something useful.
 
 (2)  Improve documentation.
@@ -10,13 +13,16 @@
 (4b) Upload documentation to readthedocs
 (4c) Announce to f1 2019 list.
 
-(5) Document the process release and gotchas.
+(5) Document the release process and gotchas.
 
-=========== Release procedure:
+Release procedure
+=================
 
 (1) Edit README.md, and setup.py, and docs/source/conf.py to bump version number.
 
     Note that in README.md, the version number occurs multiple times.
+
+    Use find/grep to look for the previous version number!
 
 (2) Do a commit of the current state of the Git repository, and tag it.
 
