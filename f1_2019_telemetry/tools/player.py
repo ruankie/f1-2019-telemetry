@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+"""This script reads F1 2019 telemetry packets stored in a SQLite3 database file and sends them out over UDP, effectively replaying a session of the F1 2019 game."""
+
 import sys
 import logging
 import threading
@@ -9,18 +11,19 @@ import sqlite3
 import socket
 import selectors
 
+from .barrier import Barrier
 from f1_2019_telemetry.packets import HeaderFieldsToPacketType
 
 class PacketPlaybackThread(threading.Thread):
     """The PacketPlaybackThread reads telemetry data from an SQLite3 file and plays it back as UDP packets."""
 
-    def __init__(self, filename, destination, port, realtime_factor, quit_notifier):
+    def __init__(self, filename, destination, port, realtime_factor, quit_barrier):
         super().__init__(name='playback')
         self._filename = filename
         self._destination = destination
         self._port = port
         self._realtime_factor = realtime_factor
-        self._quit_notifier = quit_notifier
+        self._quit_barrier = quit_barrier
 
         self._packets = []
         self._packets_lock = threading.Lock()
@@ -96,7 +99,7 @@ class PacketPlaybackThread(threading.Thread):
 
         sock.close()
 
-        self._quit_notifier.request_quit()
+        self._quit_barrier.proceed()
 
         logging.info("playback thread stopped.")
 
@@ -108,9 +111,9 @@ class PacketPlaybackThread(threading.Thread):
 class WaitConsoleThread(threading.Thread):
     """The WaitConsoleThread runs until console input is available (or it is asked to quit before)."""
 
-    def __init__(self, quit_notifier):
+    def __init__(self, quit_barrier):
         super().__init__(name='console')
-        self._quit_notifier = quit_notifier
+        self._quit_barrier = quit_barrier
         self._socketpair = socket.socketpair()
 
     def close(self):
@@ -136,30 +139,13 @@ class WaitConsoleThread(threading.Thread):
                 elif key == key_stdin:
                     quitflag = True
 
-        self._quit_notifier.request_quit()
+        self._quit_barrier.request_quit()
 
         logging.info("Console wait thread stopped.")
 
     def request_quit(self):
         """Called from the main thread to request that we quit."""
         self._socketpair[1].send(b'\x00')
-
-
-class QuitNotifier:
-
-    def __init__(self):
-        self._quit_requested = False
-        self._cv = threading.Condition(threading.Lock())
-
-    def request_quit(self):
-        with self._cv:
-            self._quit_requested = True
-            self._cv.notify_all()
-
-    def wait(self):
-        with self._cv:
-            while not self._quit_requested:
-                self._cv.wait()
 
 
 def main():
@@ -182,17 +168,17 @@ def main():
 
     # Start threads.
 
-    quit_notifier = QuitNotifier()
+    quit_barrier = Barrier()
 
-    playback_thread = PacketPlaybackThread(args.filename, args.destination, args.port, args.realtime_factor, quit_notifier)
+    playback_thread = PacketPlaybackThread(args.filename, args.destination, args.port, args.realtime_factor, quit_barrier)
     playback_thread.start()
 
-    wait_console_thread = WaitConsoleThread(quit_notifier)
+    wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
     # Playback and wait_console threads are now active. Wait until either asks us to quit.
 
-    quit_notifier.wait()
+    quit_barrier.wait()
 
     # Stop threads.
 

@@ -49,6 +49,7 @@ import selectors
 
 from collections import namedtuple
 
+from .barrier import Barrier
 from f1_2019_telemetry.packets import PacketHeader, PacketID, HeaderFieldsToPacketType, unpack_udp_packet
 
 # The type used by the PacketReceiverThread to represent incoming telemetry packets, with timestamp.
@@ -419,9 +420,9 @@ class PacketReceiverThread(threading.Thread):
 class WaitConsoleThread(threading.Thread):
     """The WaitConsoleThread runs until console input is available (or it is asked to quit before)."""
 
-    def __init__(self, quit_notifier):
+    def __init__(self, quit_barrier):
         super().__init__(name='console')
-        self._quit_notifier = quit_notifier
+        self._quit_barrier = quit_barrier
         self._socketpair = socket.socketpair()
 
     def close(self):
@@ -447,30 +448,13 @@ class WaitConsoleThread(threading.Thread):
                 elif key == key_stdin:
                     quitflag = True
 
-        self._quit_notifier.request_quit()
+        self._quit_barrier.proceed()
 
         logging.info("Console wait thread stopped.")
 
     def request_quit(self):
         """Called from the main thread to request that we quit."""
         self._socketpair[1].send(b'\x00')
-
-
-class QuitNotifier:
-
-    def __init__(self):
-        self._quit_requested = False
-        self._cv = threading.Condition(threading.Lock())
-
-    def request_quit(self):
-        with self._cv:
-            self._quit_requested = True
-            self._cv.notify_all()
-
-    def wait(self):
-        with self._cv:
-            while not self._quit_requested:
-                self._cv.wait()
 
 
 def main():
@@ -492,7 +476,7 @@ def main():
 
     # Start recorder thread first, then receiver thread.
 
-    quit_notifier = QuitNotifier()
+    quit_barrier = Barrier()
 
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
@@ -500,14 +484,18 @@ def main():
     receiver_thread = PacketReceiverThread(args.port, recorder_thread)
     receiver_thread.start()
 
-    wait_console_thread = WaitConsoleThread(quit_notifier)
+    wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
-    # Recorder, receiver, and wait_console threads are now active. Wait until any us to quit.
+    # Recorder, receiver, and wait_console threads are now active. Wait until any of them asks us to quit.
 
-    quit_notifier.wait()
+    quit_barrier.wait()
 
-    # Stop receiver thread first, then recorder thread.
+    # Stop threads.
+
+    wait_console_thread.request_quit()
+    wait_console_thread.join()
+    wait_console_thread.close()
 
     receiver_thread.request_quit()
     receiver_thread.join()
