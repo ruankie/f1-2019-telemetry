@@ -10,7 +10,7 @@ import logging
 import selectors
 import math
 
-from .barrier import Barrier
+from .threading_utils import WaitConsoleThread, Barrier
 from f1_2019_telemetry.packets import PacketID, unpack_udp_packet
 
 
@@ -107,46 +107,6 @@ class PacketMonitorThread(threading.Thread):
 
         Called from the main thread to request that we quit.
         """
-        self._socketpair[1].send(b'\x00')
-
-
-class WaitConsoleThread(threading.Thread):
-    """The WaitConsoleThread runs until console input is available (or it is asked to quit before)."""
-
-    def __init__(self, quit_barrier):
-        super().__init__(name='console')
-        self._quit_barrier = quit_barrier
-        self._socketpair = socket.socketpair()
-
-    def close(self):
-        for sock in self._socketpair:
-            sock.close()
-
-    def run(self):
-        """Wait until stdin has input.
-
-        The run method executes in its own thread.
-        """
-        selector = selectors.DefaultSelector()
-        key_socketpair = selector.register(self._socketpair[0], selectors.EVENT_READ)
-        key_stdin      = selector.register(sys.stdin, selectors.EVENT_READ)
-
-        logging.info("Console wait thread started.")
-
-        quitflag = None
-        while not quitflag:
-            for (key, events) in selector.select():
-                if key == key_socketpair:
-                    quitflag = True
-                elif key == key_stdin:
-                    quitflag = True
-
-        self._quit_barrier.proceed()
-
-        logging.info("Console wait thread stopped.")
-
-    def request_quit(self):
-        """Called from the main thread to request that we quit."""
         self._socketpair[1].send(b'\x00')
 
 
