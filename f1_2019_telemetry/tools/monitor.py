@@ -136,7 +136,7 @@ def main():
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
-    # Monitor and wait_console threads are now active. Wait until either of them asks us to quit.
+    # Monitor and wait_console threads are now active. Run until we're asked to quit.
 
     quit_barrier.wait()
 

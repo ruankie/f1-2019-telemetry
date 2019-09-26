@@ -137,7 +137,7 @@ def main():
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
-    # Playback and wait_console threads are now active. Wait until either asks us to quit.
+    # Playback and wait_console threads are now active. Run until we're asked to quit.
 
     quit_barrier.wait()
 

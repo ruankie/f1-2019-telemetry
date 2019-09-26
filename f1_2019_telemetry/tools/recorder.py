@@ -447,7 +447,7 @@ def main():
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
-    # Recorder, receiver, and wait_console threads are now active. Wait until any of them asks us to quit.
+    # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
 
     quit_barrier.wait()
 
