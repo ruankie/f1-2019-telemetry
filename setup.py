@@ -10,7 +10,7 @@ The format of these packets is documented by CodeMasters.
 This package provides ctype-based definitions of all packet types that the game sends.
 
 In addition to that, the package also provides command line tools to record, playback,
-and monitor race sessions. These tools are useful by themselves, but also serve as
+and monitor game session data. These tools are useful by themselves, but also serve as
 examples of how to capture and decode live game data in Python.
 """
 
