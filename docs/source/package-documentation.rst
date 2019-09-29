@@ -44,6 +44,7 @@ A minimalistic example is as follows:
 
 .. literalinclude:: minimal_example.py
     :language: python
+    :linenos:
 
 This example opens a UDP socket on port 20777, which is the default port that the F1 2019 game uses to send packages;
 it then waits for packages and, upon reception, prints their full contents.
@@ -134,6 +135,7 @@ Module *f1_2019_telemetry.packets* is the main module of the package. It impleme
 
 .. literalinclude:: ../../f1_2019_telemetry/packets.py
     :language: python
+    :linenos:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Module f1_2019_telemetry.tools.recorder
@@ -145,6 +147,7 @@ The script starts a thread to capture incoming UDP packets, and a thread to writ
 
 .. literalinclude:: ../../f1_2019_telemetry/tools/recorder.py
     :language: python
+    :linenos:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Module f1_2019_telemetry.tools.player
@@ -156,6 +159,7 @@ The script starts a thread to read session data packets stored in a SQLite3 data
 
 .. literalinclude:: ../../f1_2019_telemetry/tools/player.py
     :language: python
+    :linenos:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Module f1_2019_telemetry.tools.monitor
@@ -167,3 +171,4 @@ The script starts a thread to capture incoming UDP packets, and outputs a summar
 
 .. literalinclude:: ../../f1_2019_telemetry/tools/monitor.py
     :language: python
+    :linenos:
