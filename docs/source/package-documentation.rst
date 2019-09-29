@@ -97,7 +97,7 @@ f1-2019-telemetry-player
    Replay an F1 2019 session as UDP packets.
 
    positional arguments:
-     filename                                     F1_2019 packet dump SQLite3 filename to replay
+     filename                                     SQLite3 file to replay packets from
 
    optional arguments:
      -h, --help                                   show this help message and exit
@@ -114,7 +114,7 @@ f1-2019-telemetry-monitor
 
    usage: f1-2019-telemetry-monitor [-h] [-p PORT]
 
-   Monitor incoming F1 2019 telemetry data.
+   Monitor UDP port for incoming F1 2019 telemetry data and print information.
 
    optional arguments:
      -h, --help              show this help message and exit
@@ -161,9 +161,9 @@ The script starts a thread to read session data packets stored in a SQLite3 data
 Module f1_2019_telemetry.tools.monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Module *f1_2019_telemetry.tools.monitor* is a script that implements session monitoring functionality to display live session data.
+Module *f1_2019_telemetry.tools.monitor* is a script that prints live session data.
 
-The script starts a thread to capture incoming UDP packets, and displays a summary of information on the command line.
+The script starts a thread to capture incoming UDP packets, and outputs a summary of incoming packets.
 
 .. literalinclude:: ../../f1_2019_telemetry/tools/monitor.py
     :language: python
