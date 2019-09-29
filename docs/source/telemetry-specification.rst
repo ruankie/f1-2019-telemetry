@@ -1,10 +1,12 @@
+.. _telemetry-specification:
+
 ======================================
 F1 2019 Telemetry Packet Specification
 ======================================
 
 .. note::
 
-   This specification was copied (with minor editorial changes) from the CodeMasters forum topic describing the F1 2019 telemetry UDP packet specification as found here:
+   This specification was copied (with minor corrections as listed below) from the CodeMasters forum topic describing the F1 2019 telemetry UDP packet specification as found here:
 
    https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
@@ -13,12 +15,12 @@ F1 2019 Telemetry Packet Specification
 
    The following corrections were made in the process of copying the specification:
 
-   * Added `uint32` type to the `Packet Types` table;
-   * Changed type of field `m_frameIdentifier` in the `PacketHeader` struct from `uint` to `uint32`;
-   * In struct `PacketMotionData`: corrected comments of the fields `m_angularAccelerationX`, `m_angularAccelerationY`,
-     and `m_angularAccelerationZ` to reflect that the values represent accelerations rather than velocities.
-   * In struct `CarSetupData`: corrected comment of field `m_rearAntiRollBar` to refer to `rear` instead of `front`.
-   * In the Driver IDs appendix: corrected the name of driver `Wilheim Kaufmann` to `Wilhelm Kaufmann`.
+   * Added *uint32* type to the *Packet Types* table;
+   * Changed type of field *m_frameIdentifier* in the *PacketHeader* struct from *uint* to *uint32*;
+   * In struct *PacketMotionData*: corrected comments of the fields *m_angularAccelerationX*, *m_angularAccelerationY*,
+     and *m_angularAccelerationZ* to reflect that the values represent accelerations rather than velocities;
+   * In struct *CarSetupData*: corrected comment of field *m_rearAntiRollBar8 to refer to *rear* instead of *front*;
+   * In the Driver IDs appendix: corrected the name of driver *Wilheim Kaufmann* to *Wilhelm Kaufmann*.
 
 The F1 series of games support the output of certain game data across UDP connections.
 This data can be used supply race information to external applications, or to drive certain hardware (e.g. motion platforms, force feedback steering wheels and LED devices).
@@ -30,6 +32,12 @@ If you cannot find the information that you require then please contact communit
 ------------------
 Packet Information
 ------------------
+
+.. note::
+
+   The structure definitions given below are specified in the syntax of the C programming language.
+
+   The Python versions provided by the *f1-telemetry-packet* package are very similar to the C versions, with the notable exception that for all field names, the *m\_* prefix is omitted. For example, the header field *m_packetFormat* is just called *packetFormat* in the Python version.
 
 ^^^^^^^^^^^^
 Packet Types
@@ -81,9 +89,9 @@ Each packet has the following header:
        uint8     m_playerCarIndex;       // Index of player's car in the array
    };
 
-^^^^^^^^^^
+""""""""""
 Packet IDs
-^^^^^^^^^^
+""""""""""
 
 The packets IDs are as follows:
 
@@ -308,9 +316,9 @@ This packet gives details of events that happen during the course of a session.
                                                 // for each type
    };
 
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""
 Event String Codes
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""
 
 +-------------------+--------+----------------------------------------+
 | Event             | Code   | Description                            |
@@ -519,9 +527,9 @@ It includes values such as the damage readings on the car.
        CarStatusData    m_carStatusData[20];
    };
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""
 Restricted data (Your Telemetry setting)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""
 
 There is some data in the UDP that you may not want other players seeing if you are in a multiplayer game.
 This is controlled by the “Your Telemetry” setting in the Telemetry options.

@@ -118,7 +118,7 @@ def main():
 
     # Parse command line arguments.
 
-    parser = argparse.ArgumentParser(description="Replay an F1 2019 session as UDP packets")
+    parser = argparse.ArgumentParser(description="Replay an F1 2019 session as UDP packets.")
 
     parser.add_argument("-r", "--rtf", dest='realtime_factor', type=float, default=1.0, help="playback real-time factor (higher is faster, default=1.0)")
     parser.add_argument("-d", "--destination", type=str, default=None, help="destination UDP address; omit to use broadcast (default)")

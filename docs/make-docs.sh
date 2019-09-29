@@ -2,16 +2,17 @@
 
 set -e
 
-if [ -z $LOCAL_PYTHON3_BIN ] ; then
-    echo "Please define LOCAL_PYTHON3_BIN environment variable."
-    exit 1
+if [ -n $LOCAL_PYTHON3_BIN ] ; then
+    export PATH=$LOCAL_PYTHON3_BIN:$PATH
 fi
 
-export PATH=$LOCAL_PYTHON3_BIN:$PATH
 
 # Start afresh
 rm -rf source/generated build
 
-sphinx-apidoc -o source/generated ../f1_2019_telemetry
+# We won't use autodoc.
+# Its documentation isn't really helpful, compared to just reading the sources.
+
+#sphinx-apidoc --separate --no-toc --module-first -o source/generated ../f1_2019_telemetry
 
 make html

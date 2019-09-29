@@ -1,20 +1,17 @@
-==========================================
-Documentation of package f1-2019-telemetry
-==========================================
+=========================================
+Welcome to the f1-2019-telemetry package!
+=========================================
 
-The f1-2019-telemetry package implements support for interpreting telemetry information as sent out over the network by the F1 2019 game.
-It also implements several small tools to record, playback, and monitor F1 2019 session data.
+The f1-2019-telemetry package implements support for interpreting telemetry information as sent out over the network by `the F1 2019 game by CodeMasters <http://www.codemasters.com/game/f1-2019/>`_.
+It also implements several small :ref:`command line tools <command_line_tools>` to record, playback, and monitor F1 2019 session data.
 
-The core functionality is based on the CodeMasters Forum topic documenting the F1 2019 packet format: https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/.
+The documentation comes in two parts:
 
-The package should work on Python 3.6 and above.
+* The :ref:`package-documentation` provides guidance on installation and usage of the f1-2019-telemetry package, as well as documentation of the command-line tools provided.
+* The :ref:`telemetry-specification` is a non-authoritative copy of the CodeMasters telemetry packet specification, with some corrections applied.
 
 .. toctree::
-   :caption: Contents
-   :maxdepth: 1
+   :hidden:
 
-   installation
-   usage
-   command_line_tools
-   api_reference
-   specification
+   package-documentation
+   telemetry-specification

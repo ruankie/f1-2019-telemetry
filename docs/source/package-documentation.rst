@@ -1,0 +1,169 @@
+.. _package-documentation:
+
+=====================
+Package Documentation
+=====================
+
+The f1-2019-telemetry package implements support for interpreting telemetry information as sent out over the network by `the F1 2019 game by CodeMasters <http://www.codemasters.com/game/f1-2019/>`_.
+It also implements several small :ref:`command line tools <command_line_tools>` to record, playback, and monitor F1 2019 session data.
+
+The core functionality is based on the CodeMasters Forum topic documenting the F1 2019 packet format: https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/.
+
+The package should work on Python 3.6 and above.
+
+------------
+Installation
+------------
+
+The f1-2019-telemetry package is `hosted on PyPI <https://pypi.org/project/f1-2019-telemetry/>`_.
+To install it in your Python 3 environment, type:
+
+.. code-block:: console
+
+   pip3 install f1-2019-telemetry
+
+When this completes, you should be able to start your Python 3 interpreter and execute this:
+
+.. code-block:: python
+
+   import f1_2019_telemetry.packet
+
+   help(f1_2019_telemetry.packet)
+
+Apart from the *f1_2019_telemetry* package (and its main module *f1_2019_telemetry.packet*), the pip install command will also install some command-line utilities that can be used to record, playback, and monitor F1 2019 telemetry data.
+Refer to the :ref:`command_line_tools` section for more information.
+
+-----
+Usage
+-----
+
+If you want to write your own Python script to process F1 2019 telemetry data, you will need to set up the reception of UDP packets.
+After that, use the function *unpack_udp_packet()* to unpack the binary packet to an appropriate object with all the data fields present.
+
+A minimalistic example is as follows:
+
+.. literalinclude:: minimal_example.py
+    :language: python
+
+This example opens a UDP socket on port 20777, which is the default port that the F1 2019 game uses to send packages;
+it then waits for packages and, upon reception, prints their full contents.
+
+To generate some data, start your F1 2019 game, and go to the Telemetry Settings (these can be found under Game Options / Settings).
+
+* Make sure that the *UDP Telemetry* setting is set to *On*.
+* The *UDP Broadcast* setting should be either set to *On*, or it should be set to *Off*, and then the *UDP IP Address* setting should be set to the IP address of the computer on which you intend to run the Python script that will capture game session data.
+  For example, if you want the Python script to run on the same computer that runs the game, and you don't want to send out UDP packets to all devices in your home network, you can set the *UDP Broadcast* setting to *Off* and the *UDP IP Address* setting to *127.0.0.1*.
+* The *UDP Port* setting can be keep its default value of *20777*.
+* The *UDP Send Rate* setting can be set to *60*, assuming you have a sufficiently powerful computer to run the game.
+* The *UDP Format* setting should be set to *2019*.
+
+Now, if you start a race session with the Python script given above running, you should see a continuous stream of game data being printed to your command line terminal.
+
+The example script given above is about as simple as it can be to capture game data.
+For more elaborate examples, check the source code of the provided `f1_2019_telemetry.tools.monitor.py` and `f1_2019_telemetry.tools.recorder.py` scripts.
+
+.. _command_line_tools:
+
+------------------
+Command Line Tools
+------------------
+
+The f1-2019-telemetry package installs three command-line tools that provide basic recording, playback, and session monitoring support.
+Below, we reproduce their command-line help for reference.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-recorder
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+   usage: f1-2019-telemetry-recorder [-h] [-p PORT] [-i INTERVAL]
+
+   Record F1 2019 telemetry data to SQLite3 files.
+
+   optional arguments:
+     -h, --help                          show this help message and exit
+     -p PORT, --port PORT                UDP port to listen to (default: 20777)
+     -i INTERVAL, --interval INTERVAL    interval for writing incoming data to SQLite3 file, in seconds (default: 1.0)
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-player
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+   usage: f1-2019-telemetry-player [-h] [-r REALTIME_FACTOR] [-d DESTINATION] [-p PORT] filename
+
+   Replay an F1 2019 session as UDP packets.
+
+   positional arguments:
+     filename                                     F1_2019 packet dump SQLite3 filename to replay
+
+   optional arguments:
+     -h, --help                                   show this help message and exit
+     -r REALTIME_FACTOR, --rtf REALTIME_FACTOR    playback real-time factor (higher is faster, default=1.0)
+     -d DESTINATION, --destination DESTINATION    destination UDP address; omit to use broadcast (default)
+     -p PORT, --port PORT                         destination UDP port (default: 20777)
+
+
+^^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-monitor
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+   usage: f1-2019-telemetry-monitor [-h] [-p PORT]
+
+   Monitor incoming F1 2019 telemetry data.
+
+   optional arguments:
+     -h, --help              show this help message and exit
+     -p PORT, --port PORT    UDP port to listen to (default: 20777)
+
+-------------------
+Package Source Code
+-------------------
+
+The source code of the packets is pretty well documented and easy to follow. We reproduce it here for reference.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module f1_2019_telemetry.packets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Module *f1_2019_telemetry.packets* is the main module of the package. It implements ctypes *struct* types for all kinds of packets, and it implements the *unpack_udp_packet()* function that take the contents of a raw UDP packet and interprets is as the appropriate telemetry packet, if possible.
+
+.. literalinclude:: ../../f1_2019_telemetry/packets.py
+    :language: python
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module f1_2019_telemetry.tools.recorder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Module *f1_2019_telemetry.tools.recorder* is a script that implements session data recorder functionality.
+
+The script starts a thread to capture incoming UDP packets, and a thread to write captured UDP packets to an SQLite3 database file.
+
+.. literalinclude:: ../../f1_2019_telemetry/tools/recorder.py
+    :language: python
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module f1_2019_telemetry.tools.player
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Module *f1_2019_telemetry.tools.player* is a script that implements session data playback functionality.
+
+The script starts a thread to read session data packets stored in a SQLite3 database file, and plays them back as UDP network packets. The speed at which playback happens can be changed by a command-line parameter.
+
+.. literalinclude:: ../../f1_2019_telemetry/tools/player.py
+    :language: python
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module f1_2019_telemetry.tools.monitor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Module *f1_2019_telemetry.tools.monitor* is a script that implements session monitoring functionality to display live session data.
+
+The script starts a thread to capture incoming UDP packets, and displays a summary of information on the command line.
+
+.. literalinclude:: ../../f1_2019_telemetry/tools/monitor.py
+    :language: python
