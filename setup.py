@@ -17,7 +17,7 @@ examples of how to capture and decode live game data in Python.
 setup(
 
     name="f1-2019-telemetry",
-    version="1.0.2",
+    version="1.0.6",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
@@ -26,7 +26,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/plain",
 
-    url="https://github.com/sidneycadot/f1-2019-telemetry/",
+    url="https://gitlab.com/reddish/f1-2019-telemetry/",
+
+    master_doc='index', # ReadTheDocs needs this.
 
     # Since we don't have __init__.py files, our packages aren't found by setuptools.find_packages().
     # We therefore specify them explicitly here.
