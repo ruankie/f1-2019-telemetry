@@ -20,7 +20,7 @@ This allows installation using the standard Python _pip_ tool as follows:
 
     pip install f1-2019-telemetry
 
-The project is hosted on GitLab: https://gitlab.com/reddish/f1-2019-telemetry
+The project is hosted on GitLab: https://gitlab.com/reddish/f1-2019-telemetry/
 
 The PyPI page for the package is here: https://pypi.org/project/f1-2019-telemetry/1.1.0/
 
