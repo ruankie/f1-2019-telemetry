@@ -858,6 +858,8 @@ HeaderFieldsToPacketType = {
     (2019, 1, 7) : PacketCarStatusData_V1
 }
 
+class UnpackError(Exception):
+    pass
 
 def unpack_udp_packet(packet: bytes) -> PackedLittleEndianStructure:
     """Convert raw UDP packet to an appropriately-typed telemetry packet.
@@ -869,27 +871,27 @@ def unpack_udp_packet(packet: bytes) -> PackedLittleEndianStructure:
         The decoded packet structure.
 
     Raises:
-        ValueError if a problem is detected.
+        UnpackError if a problem is detected.
     """
     actual_packet_size = len(packet)
 
     header_size = ctypes.sizeof(PacketHeader)
 
     if actual_packet_size < header_size:
-        raise ValueError("Bad telemetry packet: too short ({} bytes).".format(actual_packet_size))
+        raise UnpackError("Bad telemetry packet: too short ({} bytes).".format(actual_packet_size))
 
     header = PacketHeader.from_buffer_copy(packet)
     key = (header.packetFormat, header.packetVersion, header.packetId)
 
     if key not in HeaderFieldsToPacketType:
-        raise ValueError("Bad telemetry packet: no match for key fields {!r}.".format(key))
+        raise UnpackError("Bad telemetry packet: no match for key fields {!r}.".format(key))
 
     packet_type = HeaderFieldsToPacketType[key]
 
     expected_packet_size = ctypes.sizeof(packet_type)
 
     if actual_packet_size != expected_packet_size:
-        raise ValueError("Bad telemetry packet: bad size for {} packet; expected {} bytes but received {} bytes.".format(
+        raise UnpackError("Bad telemetry packet: bad size for {} packet; expected {} bytes but received {} bytes.".format(
             packet_type.__name__, expected_packet_size, actual_packet_size))
 
     return packet_type.from_buffer_copy(packet)
