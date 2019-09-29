@@ -37,7 +37,7 @@ Packet Information
 
    The structure definitions given below are specified in the syntax of the C programming language.
 
-   The Python versions provided by the *f1-telemetry-packet* package are very similar to the C versions, with the notable exception that for all field names, the *m\_* prefix is omitted. For example, the header field *m_packetFormat* is just called *packetFormat* in the Python version.
+   The Python versions of the structures provided by the *f1-telemetry-packet* package are very similar to the C versions, with the notable exception that for all field names, the *m\_* prefix is omitted. For example, the header field *m_packetFormat* is just called *packetFormat* in the Python version.
 
 ^^^^^^^^^^^^
 Packet Types
