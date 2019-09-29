@@ -13,7 +13,7 @@ The package should work on Python 3.6 and above.
 Project information
 -------------------
 
-The f1-2019-telemetry package and its documentation are currently at version **1.0.7**.
+The f1-2019-telemetry package and its documentation are currently at version **1.1.0**.
 
 The project is distributed as a standard wheel package on PyPI.
 This allows installation using the standard Python _pip_ tool as follows:
@@ -22,7 +22,7 @@ This allows installation using the standard Python _pip_ tool as follows:
 
 The project is hosted on GitLab: https://gitlab.com/reddish/f1-2019-telemetry
 
-The PyPI page for the package is here: https://pypi.org/project/f1-2019-telemetry/1.0.7/
+The PyPI page for the package is here: https://pypi.org/project/f1-2019-telemetry/1.1.0/
 
 The package documentation can be read here: https://f1-2019-telemetry.readthedocs.io/en/latest/
 

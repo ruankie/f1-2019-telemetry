@@ -17,7 +17,7 @@ examples of how to capture and decode live game data in Python.
 setup(
 
     name="f1-2019-telemetry",
-    version="1.0.7",
+    version="1.1.0",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
