@@ -19,7 +19,7 @@ F1 2019 Telemetry Packet Specification
    * Changed type of field *m_frameIdentifier* in the *PacketHeader* struct from *uint* to *uint32*;
    * In struct *PacketMotionData*: corrected comments of the fields *m_angularAccelerationX*, *m_angularAccelerationY*,
      and *m_angularAccelerationZ* to reflect that the values represent accelerations rather than velocities;
-   * In struct *CarSetupData*: corrected comment of field *m_rearAntiRollBar8 to refer to *rear* instead of *front*;
+   * In struct *CarSetupData*: corrected comment of field *m_rearAntiRollBar* to refer to *rear* instead of *front*;
    * In the Driver IDs appendix: corrected the name of driver *Wilheim Kaufmann* to *Wilhelm Kaufmann*.
 
 The F1 series of games support the output of certain game data across UDP connections.
