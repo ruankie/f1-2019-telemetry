@@ -11,7 +11,7 @@ import selectors
 import math
 
 from .threading_utils import WaitConsoleThread, Barrier
-from f1_2019_telemetry.packets import PacketID, unpack_udp_packet
+from ..packets import PacketID, unpack_udp_packet
 
 
 class PacketMonitorThread(threading.Thread):

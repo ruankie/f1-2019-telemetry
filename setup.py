@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 long_description=\
 """This package provides functionality to handle UDP telemetry data as sent by the F1 2019 game.
@@ -17,7 +17,7 @@ examples of how to capture and decode live game data in Python.
 setup(
 
     name="f1-2019-telemetry",
-    version="1.0.1",
+    version="1.0.2",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
@@ -28,7 +28,9 @@ setup(
 
     url="https://github.com/sidneycadot/f1-2019-telemetry/",
 
-    packages=find_packages(),
+    # Since we don't have __init__.py files, our packages aren't found by setuptools.find_packages().
+    # We therefore specify them explicitly here.
+    packages=['f1_2019_telemetry', 'f1_2019_telemetry.tools'],
 
     entry_points={
         'console_scripts': [

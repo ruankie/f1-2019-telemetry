@@ -12,7 +12,7 @@ import socket
 import selectors
 
 from .threading_utils import WaitConsoleThread, Barrier
-from f1_2019_telemetry.packets import HeaderFieldsToPacketType
+from ..packets import HeaderFieldsToPacketType
 
 
 class PacketPlaybackThread(threading.Thread):

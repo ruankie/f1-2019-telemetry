@@ -61,7 +61,7 @@ To generate some data, start your F1 2019 game, and go to the Telemetry Settings
 Now, if you start a race session with the Python script given above running, you should see a continuous stream of game data being printed to your command line terminal.
 
 The example script given above is about as simple as it can be to capture game data.
-For more elaborate examples, check the source code of the provided `f1_2019_telemetry.tools.monitor.py` and `f1_2019_telemetry.tools.recorder.py` scripts.
+For more elaborate examples, check the source code of the provided :ref:`f1_2019_telemetry.tools.monitor <source_monitor>` and :ref:`f1_2019_telemetry.tools.recorder <source_recorder>` scripts.
 
 .. _command_line_tools:
 
@@ -72,9 +72,9 @@ Command Line Tools
 The f1-2019-telemetry package installs three command-line tools that provide basic recording, playback, and session monitoring support.
 Below, we reproduce their command-line help for reference.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-f1-2019-telemetry-recorder
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-recorder script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
@@ -87,9 +87,9 @@ f1-2019-telemetry-recorder
      -p PORT, --port PORT                UDP port to listen to (default: 20777)
      -i INTERVAL, --interval INTERVAL    interval for writing incoming data to SQLite3 file, in seconds (default: 1.0)
 
-^^^^^^^^^^^^^^^^^^^^^^^^
-f1-2019-telemetry-player
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-player script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
@@ -107,9 +107,9 @@ f1-2019-telemetry-player
      -p PORT, --port PORT                         destination UDP port (default: 20777)
 
 
-^^^^^^^^^^^^^^^^^^^^^^^^^
-f1-2019-telemetry-monitor
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+f1-2019-telemetry-monitor script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
@@ -125,11 +125,14 @@ f1-2019-telemetry-monitor
 Package Source Code
 -------------------
 
-The source code of the packets is pretty well documented and easy to follow. We reproduce it here for reference.
+The source code of the package is pretty well documented and easy to follow. We reproduce it here for reference.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module f1_2019_telemetry.packets
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _source_packets:
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.packets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Module *f1_2019_telemetry.packets* is the main module of the package. It implements ctypes *struct* types for all kinds of packets, and it implements the *unpack_udp_packet()* function that take the contents of a raw UDP packet and interprets is as the appropriate telemetry packet, if possible.
 
@@ -137,9 +140,11 @@ Module *f1_2019_telemetry.packets* is the main module of the package. It impleme
     :language: python
     :linenos:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module f1_2019_telemetry.tools.recorder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _source_recorder:
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.tools.recorder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Module *f1_2019_telemetry.tools.recorder* is a script that implements session data recorder functionality.
 
@@ -149,9 +154,11 @@ The script starts a thread to capture incoming UDP packets, and a thread to writ
     :language: python
     :linenos:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module f1_2019_telemetry.tools.player
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _source_player:
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.tools.player
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Module *f1_2019_telemetry.tools.player* is a script that implements session data playback functionality.
 
@@ -161,9 +168,11 @@ The script starts a thread to read session data packets stored in a SQLite3 data
     :language: python
     :linenos:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module f1_2019_telemetry.tools.monitor
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _source_monitor:
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.tools.monitor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Module *f1_2019_telemetry.tools.monitor* is a script that prints live session data.
 
