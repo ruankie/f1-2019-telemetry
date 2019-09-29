@@ -123,7 +123,7 @@ def main():
     parser.add_argument("-r", "--rtf", dest='realtime_factor', type=float, default=1.0, help="playback real-time factor (higher is faster, default=1.0)")
     parser.add_argument("-d", "--destination", type=str, default=None, help="destination UDP address; omit to use broadcast (default)")
     parser.add_argument("-p", "--port", type=int, default=20777, help="destination UDP port (default: 20777)")
-    parser.add_argument("filename", type=str, help="F1_2019 packet dump SQLite3 filename to replay")
+    parser.add_argument("filename", type=str, help="SQLite3 file to replay packets from")
 
     args = parser.parse_args()
 

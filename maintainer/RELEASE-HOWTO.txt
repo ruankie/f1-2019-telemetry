@@ -2,7 +2,7 @@
 Checklist until first release
 =============================
 
-(1)  Improve the monitor to do something useful.
+(1)  Improve the f1-2019-telemetry.tools.monitor script to do something useful.
 
 (2)  Improve documentation.
 

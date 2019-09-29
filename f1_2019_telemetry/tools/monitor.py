@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-"""This script captures F1 2019 telemetry packets (sent over UDP) and emits useful info."""
+"""This script monitors a UDP port for F1 2019 telemetry packets and prints useful info upon reception."""
 
 import argparse
 import sys
@@ -120,7 +120,7 @@ def main():
 
     # Parse command line arguments.
 
-    parser = argparse.ArgumentParser(description="Monitor incoming F1 2019 telemetry data.")
+    parser = argparse.ArgumentParser(description="Monitor UDP port for incoming F1 2019 telemetry data and print information.")
 
     parser.add_argument("-p", "--port", default=20777, type=int, help="UDP port to listen to (default: 20777)", dest='port')
 
