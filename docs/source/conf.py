@@ -21,9 +21,7 @@ copyright = '2019, Sidney Cadot'
 author = 'Sidney Cadot'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.7'
-
-master_doc = 'index' # NOTE: ReadTheDocs needs this!
+release = '1.0.8'
 
 # -- General configuration ---------------------------------------------------
 
