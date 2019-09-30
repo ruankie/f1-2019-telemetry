@@ -13,7 +13,7 @@ Step-by-step release procedure
 
 (2) Verify that a local build of the documentation succeeds, by running the 'maintainer/make-docs.sh' script.
 
-(3) Do a commit of the current state of the Git repository.
+(3) Do a commit of the current state of the Git repository, and push it to GitLab.
 
 (4) Go to Read the Docs and trigger a rebuild of the documentation.
 
