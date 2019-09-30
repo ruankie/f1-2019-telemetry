@@ -20,22 +20,14 @@ The project can be installed using the standard Python 3 _pip_ tool as follows:
 
     pip install f1-2019-telemetry
 
-The project is hosted as a Git repository on [GitLab](https://gitlab.com): https://gitlab.com/reddish/f1-2019-telemetry/
+The project is hosted as a Git repository on [GitLab](https://gitlab.com):
 
-The pip-installable package is hosted on [PyPI](https://pypi.org): https://pypi.org/project/f1-2019-telemetry/
+https://gitlab.com/reddish/f1-2019-telemetry/
 
-The documentation is hosted on [Read the Docs](https://readthedocs.org): https://f1-2019-telemetry.readthedocs.io/en/latest/
+The pip-installable package is hosted on [PyPI](https://pypi.org):
 
+https://pypi.org/project/f1-2019-telemetry/
 
-Description of the top-level Git project files and directories
---------------------------------------------------------------
+The documentation is hosted on [Read the Docs](https://readthedocs.org):
 
-| name               | description                                               |
-| ------------------ | --------------------------------------------------------- |
-| README.md          | README file for the Git project                           |
-| LICENSE            | Project license (MIT)                                     |
-| setup.py           | Setup file for creating distributions                     |
-| readthedocs.yaml   | Configuration file for Read the Docs                      |
-| docs/              | Documentation of the project (Sphinx-based)               |
-| f1_2019_telemetry/ | The main package of the project                           |
-| maintainer/        | Information and useful scripts for the package maintainer |
+https://f1-2019-telemetry.readthedocs.io/en/latest/
