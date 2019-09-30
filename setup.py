@@ -8,7 +8,7 @@ with open("README.md") as fi:
 setup(
 
     name="f1-2019-telemetry",
-    version="1.1.1",
+    version="1.1.2",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",

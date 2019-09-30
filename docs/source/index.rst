@@ -9,18 +9,24 @@ It also provides :ref:`command line tools <command_line_tools>` to record, playb
 Project information
 -------------------
 
-The f1-2019-telemetry package and its documentation are currently at version **1.1.1**.
+The f1-2019-telemetry package and its documentation are currently at version **1.1.2**.
 
 The project is distributed as a standard wheel package on PyPI.
 This allows installation using the standard Python _pip_ tool as follows:
 
     pip install f1-2019-telemetry
 
-The project is hosted as a Git repository on `GitLab <https://gitlab.com>`_: https://gitlab.com/reddish/f1-2019-telemetry/
+The project is hosted as a Git repository on `GitLab <https://gitlab.com>`_:
 
-The pip-installable package is hosted on `PyPI <https://pypi.org>`_: https://pypi.org/project/f1-2019-telemetry/
+https://gitlab.com/reddish/f1-2019-telemetry/
 
-The documentation is hosted on `Read the Docs <https://readthedocs.org>`_: https://f1-2019-telemetry.readthedocs.io/en/latest/
+The pip-installable package is hosted on `PyPI <https://pypi.org>`_:
+
+https://pypi.org/project/f1-2019-telemetry/
+
+The documentation is hosted on `Read the Docs <https://readthedocs.org>`_:
+
+https://f1-2019-telemetry.readthedocs.io/en/latest/
 
 -------------
 Documentation
