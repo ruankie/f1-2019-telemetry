@@ -16,9 +16,9 @@ Project information
 
 The f1-2019-telemetry package and its documentation are currently at version **1.1.3**.
 
-The project can be installed using the standard Python 3 _pip_ tool as follows:
+The project can be installed using the standard Python 3 _pip3_ tool as follows:
 
-    pip install f1-2019-telemetry
+    pip3 install f1-2019-telemetry
 
 The project is hosted as a Git repository on [GitLab](https://gitlab.com):
 
