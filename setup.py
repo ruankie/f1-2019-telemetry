@@ -8,14 +8,14 @@ with open("README.md") as fi:
 setup(
 
     name="f1-2019-telemetry",
-    version="1.1.2",
+    version="1.1.3",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
 
     description="A package to handle UDP telemetry data as sent by the F1 2019 game.",
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
 
     url="https://gitlab.com/reddish/f1-2019-telemetry/",
 

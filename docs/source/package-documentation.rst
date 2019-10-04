@@ -4,13 +4,17 @@
 Package Documentation
 =====================
 
-The f1-2019-telemetry package provides support for interpreting telemetry information as sent out over the network by `the F1 2019 game by CodeMasters <http://www.codemasters.com/game/f1-2019/>`_.
+The *f1-2019-telemetry* package provides support for interpreting telemetry information as sent out over the network by `the F1 2019 game by CodeMasters <http://www.codemasters.com/game/f1-2019/>`_.
 It also provides :ref:`command line tools <command_line_tools>` to record, playback, and monitor F1 2019 session data.
 
 With each yearly release of the F1 series game, CodeMasters post a descripton of the corresponding telemetry packet format on their forum.
-For F1 2019, the packet format is described here: https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/.
+For F1 2019, the packet format is described here:
 
-The package should work on Python 3.6 and above.
+  https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
+
+A formatted version of this specification, with some small issues fixed, is included in the *f1-2019-telemetry* package and can be found :ref:`here <telemetry-specification>`.
+
+The *f1-2019-telemetry* package should work on Python 3.6 and above.
 
 ------------
 Installation
@@ -31,14 +35,14 @@ When this completes, you should be able to start your Python 3 interpreter and e
 
    help(f1_2019_telemetry.packet)
 
-Apart from the *f1_2019_telemetry* package (and its main module *f1_2019_telemetry.packet*), the pip install command will also install some command-line utilities that can be used to record, playback, and monitor F1 2019 telemetry data.
+Apart from the *f1_2019_telemetry* package (and its main module *f1_2019_telemetry.packet*), the ``pip3 install`` command will also install some command-line utilities that can be used to record, playback, and monitor F1 2019 telemetry data.
 Refer to the :ref:`command_line_tools` section for more information.
 
 -----
 Usage
 -----
 
-If you want to write your own Python script to process F1 2019 telemetry data, you will need to set up the reception of UDP packets.
+If you want to write your own Python script to process F1 2019 telemetry data, you will need to set up the reception of UDP packets yourself.
 After that, use the function *unpack_udp_packet()* to unpack the binary packet to an appropriate object with all the data fields present.
 
 A minimalistic example is as follows:
@@ -62,7 +66,7 @@ To generate some data, start your F1 2019 game, and go to the Telemetry Settings
 Now, if you start a race session with the Python script given above running, you should see a continuous stream of game data being printed to your command line terminal.
 
 The example script given above is about as simple as it can be to capture game data.
-For more elaborate examples, check the source code of the provided :ref:`f1_2019_telemetry.tools.monitor <source_monitor>` and :ref:`f1_2019_telemetry.tools.recorder <source_recorder>` scripts.
+For more elaborate examples, check the source code of the provided :ref:`f1_2019_telemetry.tools.monitor <source_monitor>` and :ref:`f1_2019_telemetry.tools.recorder <source_recorder>` scripts. Note that those examples are considerably more complicated because they use multi-threading.
 
 .. _command_line_tools:
 
@@ -107,7 +111,6 @@ f1-2019-telemetry-player script
      -d DESTINATION, --destination DESTINATION    destination UDP address; omit to use broadcast (default)
      -p PORT, --port PORT                         destination UDP port (default: 20777)
 
-
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 f1-2019-telemetry-monitor script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -126,8 +129,7 @@ f1-2019-telemetry-monitor script
 Package Source Code
 -------------------
 
-The source code of the package is pretty well documented and easy to follow. We reproduce it here for reference.
-
+The source code of all modules in the package is pretty well documented and easy to follow. We reproduce it here for reference.
 
 .. _source_packets:
 
@@ -154,6 +156,7 @@ The script starts a thread to capture incoming UDP packets, and a thread to writ
 .. literalinclude:: ../../f1_2019_telemetry/tools/recorder.py
     :language: python
     :linenos:
+
 
 .. _source_player:
 
