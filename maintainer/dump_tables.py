@@ -131,13 +131,13 @@ def dump_tables(dump_table_func):
     # This table is in the spec as given on the CodeMaster forum, but not in the module.
     # Note that we added the 'uint32' type which is missing from the spec.
     TypesAndDescriptionsTable = [
-        ( "uint8"  , "Unsigned 8-bit integer"  ),
-        ( "int8"   , "Signed 8-bit integer"    ),
-        ( "uint16" , "Unsigned 16-bit integer" ),
-        ( "int16"  , "Signed 16-bit integer"   ),
-        ( "uint32" , "Unsigned 32-bit integer" ),
-        ( "float"  , "Floating point (32-bit)" ),
-        ( "uint64" , "Unsigned 64-bit integer" )
+        ( "uint8_t"  , "Unsigned 8-bit integer"  ),
+        ( "int8_t"   , "Signed 8-bit integer"    ),
+        ( "uint16_t" , "Unsigned 16-bit integer" ),
+        ( "int16_t"  , "Signed 16-bit integer"   ),
+        ( "uint32_t" , "Unsigned 32-bit integer" ),
+        ( "float"    , "Floating point (32-bit)" ),
+        ( "uint64_t" , "Unsigned 64-bit integer" )
     ]
 
     dump_table_func(TypesAndDescriptionsTable, ["Type", "Description"])
