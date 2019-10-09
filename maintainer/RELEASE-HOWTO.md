@@ -13,13 +13,17 @@ Step-by-step release procedure
 
 (3) Use find/grep to verify that the previous version number isn't found.
 
-(4) Do a commit of the current state of the Git repository, and push it to GitLab.
+(4) Do a commit of the current state of the Git repository.
+
+    When done, push the local repository.
 
 (5) Go to Read the Docs and trigger a rebuild of the documentation.
 
     If this fails, fix the problem and go back to step (2).
 
 (6) Tag the version in Git.
+
+    When done, push the local repository.
 
 (7) Run the 'maintainer/make-dist.sh' script.
 
