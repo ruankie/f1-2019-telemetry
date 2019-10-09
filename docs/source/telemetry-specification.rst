@@ -6,16 +6,16 @@ F1 2019 Telemetry Packet Specification
 
 .. note::
 
-   This specification was copied (with the minor corrections listed below) from the CodeMasters forum topic describing the F1 2019 telemetry UDP packet specification found here:
+   This specification was copied (with the minor changes listed below) from the CodeMasters forum topic describing the F1 2019 telemetry UDP packet specification, as found here:
 
      https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
-   The forum post has one post detailing packet formats, followed by a post with Frequenctly Asked Questions, followed by a post with appendices, giving a number of lookup tables.
+   The forum post has one post detailing packet formats, followed by a post with Frequently Asked Questions, followed by a post with appendices, giving a number of lookup tables.
    The package format and appendices have been reproduced here; for the FAQ, please refer to the original forum topic.
 
    The following changes were made in the process of copying the specification:
 
-   * Added suffix '\_t' to all integer types, bringing the type names in lines with the types declared in the standard C header file ``<stdint.h>`` (equivalent to ``<cstdint>`` in C++). Incidentally, this also improves the syntax highlighting on this page.
+   * Added suffix '\_t' to all integer types, bringing the type names in lines with the types declared in the standard C header file ``<stdint.h>`` (equivalent to ``<cstdint>`` in C++). This change also improves the syntax highlighting of the struct definitions below.
    * Added the *uint32_t* type to the *Packet Types* table;
    * Changed the type of field *m_frameIdentifier* in the *PacketHeader* struct from *uint* to *uint32_t*;
    * In struct *PacketMotionData*: corrected comments of the fields *m_angularAccelerationX*, *m_angularAccelerationY*,

@@ -8,7 +8,7 @@ with open("README.md") as fi:
 setup(
 
     name="f1-2019-telemetry",
-    version="1.1.3",
+    version="1.1.4",
 
     author="Sidney Cadot",
     author_email="sidney@jigsaw.nl",
@@ -17,17 +17,24 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
 
-    url="https://gitlab.com/reddish/f1-2019-telemetry/",
+    url="https://pypi.org/project/f1-2019-telemetry/",
+
+    project_urls={
+        "Documentation": "https://f1-2019-telemetry.readthedocs.io/en/latest/",
+        "Source Repository": "https://gitlab.com/reddish/f1-2019-telemetry/",
+    },
 
     # Since we don't have __init__.py files, our packages aren't found by setuptools.find_packages().
     # We therefore specify them explicitly here.
-    packages=['f1_2019_telemetry', 'f1_2019_telemetry.tools'],
+    packages=['f1_2019_telemetry', 'f1_2019_telemetry.cli'],
+    #packages=['f1_2019_telemetry', 'f1_2019_telemetry.cli', 'f1_2019_telemetry.gui'],
 
     entry_points={
         'console_scripts': [
-            'f1-2019-telemetry-recorder=f1_2019_telemetry.tools.recorder:main',
-            'f1-2019-telemetry-player=f1_2019_telemetry.tools.player:main',
-            'f1-2019-telemetry-monitor=f1_2019_telemetry.tools.monitor:main'
+            'f1-2019-telemetry-recorder=f1_2019_telemetry.cli.recorder:main',
+            'f1-2019-telemetry-player=f1_2019_telemetry.cli.player:main',
+            'f1-2019-telemetry-monitor=f1_2019_telemetry.cli.monitor:main'
+        #   'f1-2019-telemetry-monitor-gui=f1_2019_telemetry.gui.monitor:main'
         ]
     },
 

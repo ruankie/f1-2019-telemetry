@@ -14,11 +14,11 @@ The package should work on Python 3.6 and above.
 Project information
 -------------------
 
-The f1-2019-telemetry package and its documentation are currently at version **1.1.3**.
+The f1-2019-telemetry package and its documentation are currently at version **1.1.4**.
 
-The project can be installed using the standard Python 3 _pip3_ tool as follows:
+The project can be installed using the standard Python 3 _pip_ tool as follows:
 
-    pip3 install f1-2019-telemetry
+    pip install f1-2019-telemetry
 
 The project is hosted as a Git repository on [GitLab](https://gitlab.com):
 

@@ -4,15 +4,12 @@ This package is based on the CodeMasters Forum post documenting the F1 2019 pack
 
     https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/
 
-The specification as given there has a few minor issues; these have been fixed here:
+Compared to the definitions given there, the Python version has the following changes:
 
-(1) In the 'Type / Description' table, the type 'uint', (or preferably, 'uint32', ; see also remark (2) below),
-    should be listed as it is used for the field 'm_frameIdentifier' of the 'PacketHeader' structure.
-(2) In the 'PacketHeader' structure, the type of the 'm_frameIdentifier' field is given as 'uint'.
-    For consistency with the other type names, this should be 'uint32'.
-(3) In the 'PacketMotionData' structure, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
-    refer to 'velocity' rather than 'acceleration'.
-(4) In the Driver IDs table, driver 34 has name "Wilheim Kaufmann".
+(1) In the 'PacketMotionData' structure, the comments for the three m_angularAcceleration{X,Y,Z} fields erroneously
+    refer to 'velocity' rather than 'acceleration'. This was corrected.
+(2) In the 'CarSetupData' structure, the comment of the m_rearAntiRollBar refer to rear instead of front. This was corrected.
+(3) In the Driver IDs table, driver 34 has name "Wilheim Kaufmann".
     This is a typo; whenever this driver is encountered in the game, his name is given as "Wilhelm Kaufmann".
 """
 
@@ -76,7 +73,7 @@ class PacketID(enum.IntEnum):
     SESSION       = 1
     LAP_DATA      = 2
     EVENT         = 3
-    PARTICIPANTS  = 4
+    PARTICIPANTS  = 4  # 0.2 Hz (once every five seconds)
     CAR_SETUPS    = 5
     CAR_TELEMETRY = 6
     CAR_STATUS    = 7

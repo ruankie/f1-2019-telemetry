@@ -66,7 +66,7 @@ To generate some data, start your F1 2019 game, and go to the Telemetry Settings
 Now, if you start a race session with the Python script given above running, you should see a continuous stream of game data being printed to your command line terminal.
 
 The example script given above is about as simple as it can be to capture game data.
-For more elaborate examples, check the source code of the provided :ref:`f1_2019_telemetry.tools.monitor <source_monitor>` and :ref:`f1_2019_telemetry.tools.recorder <source_recorder>` scripts. Note that those examples are considerably more complicated because they use multi-threading.
+For more elaborate examples, check the source code of the provided :ref:`f1_2019_telemetry.cli.monitor <source_monitor>` and :ref:`f1_2019_telemetry.cli.recorder <source_recorder>` scripts. Note that those examples are considerably more complicated because they use multi-threading.
 
 .. _command_line_tools:
 
@@ -145,43 +145,43 @@ Module *f1_2019_telemetry.packets* is the main module of the package. It impleme
 
 .. _source_recorder:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module: f1_2019_telemetry.tools.recorder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.cli.recorder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Module *f1_2019_telemetry.tools.recorder* is a script that implements session data recorder functionality.
+Module *f1_2019_telemetry.cli.recorder* is a script that implements session data recorder functionality.
 
 The script starts a thread to capture incoming UDP packets, and a thread to write captured UDP packets to an SQLite3 database file.
 
-.. literalinclude:: ../../f1_2019_telemetry/tools/recorder.py
+.. literalinclude:: ../../f1_2019_telemetry/cli/recorder.py
     :language: python
     :linenos:
 
 
 .. _source_player:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module: f1_2019_telemetry.tools.player
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.cli.player
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Module *f1_2019_telemetry.tools.player* is a script that implements session data playback functionality.
+Module *f1_2019_telemetry.cli.player* is a script that implements session data playback functionality.
 
 The script starts a thread to read session data packets stored in a SQLite3 database file, and plays them back as UDP network packets. The speed at which playback happens can be changed by a command-line parameter.
 
-.. literalinclude:: ../../f1_2019_telemetry/tools/player.py
+.. literalinclude:: ../../f1_2019_telemetry/cli/player.py
     :language: python
     :linenos:
 
 .. _source_monitor:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Module: f1_2019_telemetry.tools.monitor
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module: f1_2019_telemetry.cli.monitor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Module *f1_2019_telemetry.tools.monitor* is a script that prints live session data.
+Module *f1_2019_telemetry.cli.monitor* is a script that prints live session data.
 
 The script starts a thread to capture incoming UDP packets, and outputs a summary of incoming packets.
 
-.. literalinclude:: ../../f1_2019_telemetry/tools/monitor.py
+.. literalinclude:: ../../f1_2019_telemetry/cli/monitor.py
     :language: python
     :linenos:
