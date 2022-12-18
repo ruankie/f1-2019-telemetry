@@ -2,6 +2,9 @@
 F1 2019 UDP Telemetry package
 =============================
 
+> Forked form [this GitLab repo](https://gitlab.com/reddish/f1-2019-telemetry) <br>
+> All credits to [Sidney Cadot](https://gitlab.com/reddish)
+
 The f1-2019-telemetry package provides support for interpreting telemetry information as sent out over the network by [the F1 2019 game by CodeMasters](http://www.codemasters.com/game/f1-2019/).
 It also provides command-line tools to record, playback, and monitor F1 2019 session data.
 
