@@ -1,36 +1,37 @@
 
-F1 2019 UDP Telemetry package
-=============================
+# F1 2019 UDP Telemetry
 
 > Forked form [this GitLab repo](https://gitlab.com/reddish/f1-2019-telemetry) <br>
-> All credits to [Sidney Cadot](https://gitlab.com/reddish)
+> Original development by [Sidney Cadot](https://gitlab.com/reddish)
 
 The f1-2019-telemetry package provides support for interpreting telemetry information as sent out over the network by [the F1 2019 game by CodeMasters](http://www.codemasters.com/game/f1-2019/).
 It also provides command-line tools to record, playback, and monitor F1 2019 session data.
 
-With each yearly release of the F1 series game, CodeMasters post a descripton of the corresponding telemetry packet format on their forum.
-For F1 2019, the packet format is described here: https://forums.codemasters.com/topic/38920-f1-2019-udp-specification/.
+## Usage
+### Setup
+1. Clone this repo
+2. Set up a separate conda environment and activate it by running:
+    ```bash
+    conda env create -f conda.yml
+    conda activate f1-2019
+    ```
 
-The package should work on Python 3.6 and above.
+### Recording UDP packets and saving to SQL database
+> This section uses the f1-2019-telemetry CLI as describe in the [documentation](https://f1-2019-telemetry.readthedocs.io/en/latest/package-documentation.html#f1-2019-telemetry-recorder-script)
+1. Launch the F1 2019 game.
+2. Make sure UDP telemetry is enabled in the game settings.
+3. Run the following command from the `f1` conda environment (created in the setup above):
+    ```bash
+    f1-2019-telemetry-recorder -p 20777 -i 1.0
+    ```
+    > `-p` is the UDP port to listen to (default: 20777) <br>
+    > `-i` is the interval for writing incoming data to SQLite3 file, in seconds (default: 1.0)
 
 
-Project information
--------------------
+## References
 
-The f1-2019-telemetry package and its documentation are currently at version **1.1.4**.
+- The original project was developed by [Sidney Cadot](https://gitlab.com/reddish) and is hosted in [this GitLab repo](https://gitlab.com/reddish/f1-2019-telemetry)
 
-The project can be installed using the standard Python 3 _pip_ tool as follows:
+- The original `f1-2019-telemetry` is hosted on [PyPI](https://pypi.org/project/f1-2019-telemetry/)
 
-    pip install f1-2019-telemetry
-
-The project is hosted as a Git repository on [GitLab](https://gitlab.com):
-
-  https://gitlab.com/reddish/f1-2019-telemetry/
-
-The pip-installable package is hosted on [PyPI](https://pypi.org):
-
-  https://pypi.org/project/f1-2019-telemetry/
-
-The documentation is hosted on [Read the Docs](https://readthedocs.org):
-
-  https://f1-2019-telemetry.readthedocs.io/en/latest/
+- The original package documentation is hosted on [Read the Docs](https://f1-2019-telemetry.readthedocs.io/en/latest/)
