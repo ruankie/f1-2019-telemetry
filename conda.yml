@@ -1,0 +1,6 @@
+name: f1-2019
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - f1-2019-telemetry==1.1.4
